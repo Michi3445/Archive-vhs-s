@@ -8,8 +8,8 @@ Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist rei
 
 ## Ablauf
 
-1. **Startscreen:** Schwarzer Bildschirm mit kantigem, kursivem ASCII-Schriftzug „ARCHIV“ und „Made by Michi“. Nach rund einer Sekunde **verzischt** alles zu beiden Seiten.
-2. Die **Kassetten klappen auf**. Der Startscreen kommt nur einmal pro Browser-Sitzung, nach „Zurück“ von einer Kassette geht es direkt weiter.
+1. **Startscreen:** Schwarzer Bildschirm mit kantigem, kursivem ASCII-Schriftzug „ARCHIV“ und „Made by Michi“. Nach einem kurzen Moment **verzischt** alles zu beiden Seiten. Der Start läuft bei jedem Laden und dauert insgesamt höchstens 2 Sekunden.
+2. Die **Kassetten klappen auf**.
 3. **Kassette öffnen** führt zu ihrer eigenen Seite mit einem **Lernkarten-Trainer**.
 
 ## Steuerung
