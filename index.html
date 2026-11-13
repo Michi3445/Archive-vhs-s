@@ -108,122 +108,92 @@ img{image-rendering:auto}
 }
 .skip{position:absolute;z-index:2;bottom:max(22px,5vh);font-family:var(--mono);font-style:italic;font-size:10px;color:#4a4858;letter-spacing:.2em}
 
-/* ---------- Tape view ---------- */
-#tapes{position:fixed;inset:0;touch-action:none;background:var(--room);transition:opacity .25s ease,transform .25s ease}
-#tapes.leaving{opacity:0;transform:scale(1.04)}
-.scene{position:absolute;inset:0;overflow:hidden;perspective:1100px;perspective-origin:50% 22%}
+/* ---------- Karten-Reihe: flache, kantige Kassetten-Karten in Kursiv-Schräglage ---------- */
+#tapes{position:fixed;inset:0;touch-action:none;background:var(--room);display:flex;flex-direction:column;overflow:hidden;transition:opacity .22s ease,transform .22s ease}
+#tapes.leaving{opacity:0;transform:scale(1.03)}
 .aura{
-  position:absolute;left:50%;top:48%;width:min(90vw,900px);height:min(60vh,520px);transform:translate(-50%,-50%);
-  background:radial-gradient(closest-side,var(--cc-soft,rgba(155,123,255,.18)),transparent);
-  transition:background .6s ease;pointer-events:none;
+  position:absolute;left:50%;top:50%;width:min(96vw,900px);height:min(70vh,520px);transform:translate(-50%,-50%);
+  background:radial-gradient(closest-side,var(--cc-soft,rgba(155,123,255,.16)),transparent);transition:background .5s;pointer-events:none;
 }
-.floorline{position:absolute;left:0;right:0;top:calc(47% + 120px);height:1px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent)}
-#stage{position:absolute;left:50%;top:47%;width:0;height:0;transform-style:preserve-3d}
-.tape{
-  --w:280px;--h:164px;--d:44px;
-  position:absolute;left:calc(var(--w) / -2);top:calc(var(--h) / -2);
-  width:var(--w);height:var(--h);transform-style:preserve-3d;cursor:pointer;
-  --dim:0;--glow:0;
-}
-.face{position:absolute;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;background:#17161e}
-.face::after{content:"";position:absolute;inset:0;background:var(--bg);opacity:var(--dim);pointer-events:none}
-.f-front{
-  width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:4px;
-  background:linear-gradient(160deg,#22212b 0%,#16151c 55%,#121118 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.04),
-             0 0 calc(var(--glow) * var(--glow-size)) calc(var(--glow) * 2px) var(--c-glow),var(--tape-shadow);
-}
-.f-back{width:var(--w);height:var(--h);transform:rotateY(180deg) translateZ(calc(var(--d) / 2));background:#121118;border-radius:4px}
-.f-right,.f-left{width:var(--d);height:var(--h);left:calc((var(--w) - var(--d)) / 2);background:linear-gradient(90deg,#141319,#1c1b23 50%,#141319)}
-.f-right{transform:rotateY(90deg) translateZ(calc(var(--w) / 2))}
-.f-left{transform:rotateY(-90deg) translateZ(calc(var(--w) / 2))}
-.f-top,.f-bottom{width:var(--w);height:var(--d);top:calc((var(--h) - var(--d)) / 2)}
-.f-top{transform:rotateX(90deg) translateZ(calc(var(--h) / 2));background:#25242e}
-.f-bottom{transform:rotateX(-90deg) translateZ(calc(var(--h) / 2));background:#0e0d13}
-
-.label{
-  position:absolute;left:14px;right:14px;top:12px;height:62px;border-radius:2px;
-  background:linear-gradient(170deg,#f4ecd8,#ebe0c6 70%,#e2d4b4);color:#1d1a24;
-  display:flex;align-items:center;padding:0 14px 0 18px;gap:12px;
-  transform:rotate(var(--rot,0deg));
-  box-shadow:0 1px 0 rgba(0,0,0,.25);
-}
-.label::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c);opacity:.85}
-/* abgenutzte, leicht vergilbte Kanten */
-.label::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    linear-gradient(90deg,rgba(90,60,20,.08),transparent 8%,transparent 92%,rgba(90,60,20,.1));
-}
-.label .tp{position:absolute;width:34px;height:12px;background:rgba(236,228,200,.75);box-shadow:0 0 0 1px rgba(0,0,0,.04);display:none}
-.label .tp.on{display:block}
-.label .tp1{left:-10px;top:-5px;transform:rotate(-32deg)}
-.label .tp2{right:-12px;bottom:-4px;transform:rotate(-28deg)}
-.label .txt{flex:1;min-width:0;position:relative}
-.label .k{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#9a8e74}
-.label .t{font-family:var(--hand);font-size:21px;line-height:1.05;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1d1a24}
-.label .sub{font-family:var(--hand);font-size:11px;color:#5d5547;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.label .n{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--c);letter-spacing:-.02em}
-.window{
-  position:absolute;left:62px;right:62px;bottom:18px;height:54px;border-radius:4px;
-  background:linear-gradient(180deg,#07070a,#0d0c12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-  display:flex;align-items:center;justify-content:space-around;
-}
-.reel{
-  width:38px;height:38px;border-radius:50%;
-  background:
-    radial-gradient(circle,#07070a 0 5px,transparent 5.5px),
-    repeating-conic-gradient(rgba(255,255,255,.75) 0 14deg,transparent 14deg 60deg),
-    radial-gradient(circle,#2a2933 0 100%);
-  box-shadow:0 0 0 2px #2a2933;
-}
-.tape.active .reel{animation:spin 2.4s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.brand{position:absolute;left:16px;bottom:22px;font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#4a4858;writing-mode:vertical-rl;transform:rotate(180deg)}
-.spine{position:absolute;inset:8px 12px;border-radius:2px;background:#efe5cd;color:#1d1a24;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;font-family:var(--hand);font-size:13px;overflow:hidden}
-.spine::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
-.spine b{font-family:var(--mono);font-weight:500;color:var(--c)}
-.back-txt{position:absolute;inset:18px;font-family:var(--mono);font-size:9px;line-height:2;color:#55536a;letter-spacing:.1em}
-.back-txt em{font-style:normal;color:var(--c)}
-.shadow{position:absolute;left:-150px;top:110px;width:300px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent);transform:rotateX(90deg);pointer-events:none}
-
-/* HUD */
-.hud{position:absolute;z-index:5;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 max(22px,4vw);pointer-events:none;opacity:0;transition:opacity .8s ease}
+.hud{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,4vw);opacity:0;transition:opacity .5s ease}
 #tapes.ready .hud{opacity:1}
-.hud.top{top:max(22px,env(safe-area-inset-top))}
-.hud.bottom{bottom:max(26px,env(safe-area-inset-bottom));flex-direction:column;gap:14px}
-.logo{font-weight:800;font-size:15px;letter-spacing:.24em}
-.logo i{font-style:normal;color:var(--cc,var(--lila));transition:color .4s}
+.hud.top{padding-top:max(20px,env(safe-area-inset-top));flex:none}
+.hud.bottom{padding-bottom:max(22px,env(safe-area-inset-bottom));flex:none;flex-direction:column;gap:12px}
+.logo{font-weight:800;font-style:italic;font-size:16px;letter-spacing:.22em}
+.logo i{color:var(--cc,var(--lila));transition:color .3s}
 .hud-right{display:flex;gap:8px}
 #sound,.chip{
-  pointer-events:auto;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text);
-  background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;
+  font-family:var(--mono);font-style:italic;font-size:11px;letter-spacing:.08em;color:var(--text);
+  background:var(--chip);border:1px solid var(--line);padding:8px 16px;cursor:pointer;
   display:flex;align-items:center;gap:8px;
+  clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
 }
-#sound::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+#sound::before{content:"";width:7px;height:7px;background:var(--cyan);transform:skewX(-14deg)}
 #sound.off{color:var(--muted)}
-#sound.off::before{background:#3d3b48;box-shadow:none}
-.bars{display:flex;gap:6px}
-.bars{pointer-events:auto}
-.bars button{appearance:none;border:0;background:none;padding:12px 0;cursor:pointer;display:block}
-.bars button i{display:block;width:28px;height:3px;border-radius:2px;background:var(--track);transition:background .3s,width .3s}
-.bars button:hover i{background:var(--muted)}
-.bars button.on i{width:44px;background:var(--cc,var(--lila))}
-.bars button:focus-visible{outline:1px solid var(--muted);outline-offset:2px}
-#counter{font-family:var(--mono);font-size:13px;letter-spacing:.18em;color:var(--muted)}
+#sound.off::before{background:#3d3b48}
+.segs{display:flex;gap:5px;transform:skewX(-20deg)}
+.segs button{appearance:none;border:0;background:none;padding:12px 0;cursor:pointer;display:block}
+.segs button i{display:block;width:30px;height:4px;background:var(--track);transition:background .25s,width .25s}
+.segs button:hover i{background:var(--muted)}
+.segs button.on i{width:52px;background:var(--cc,var(--lila))}
+.segs button:focus-visible{outline:1px solid var(--muted);outline-offset:2px}
+#counter{font-family:var(--mono);font-style:italic;font-size:13px;letter-spacing:.18em;color:var(--muted)}
 #counter span{color:var(--text)}
-#open{pointer-events:auto;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--text);background:var(--chip);border:1px solid var(--cc,var(--lila));border-radius:999px;padding:9px 18px;cursor:pointer;transition:border-color .3s}
-#open:hover{background:var(--cc,var(--lila));color:#fff}
-.hint{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:.12em;text-align:center;padding:0 16px}
+.hint{font-family:var(--mono);font-style:italic;font-size:10px;color:var(--hint);letter-spacing:.12em;text-align:center}
+
+.deck{flex:1;min-height:0;position:relative;z-index:2}
+.card{
+  --c:#9b7bff;--w:340px;--h:214px;
+  position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);margin:calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
+  cursor:pointer;color:#eceaf2;text-align:left;font:inherit;padding:0;border:0;
+  background:linear-gradient(120deg,#22212b,#15141b 55%,#101016);
+  border-left:10px solid var(--c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),var(--tape-shadow);
+  will-change:transform,opacity;
+  display:flex;flex-direction:column;gap:12px;padding:14px 16px 14px 14px;
+}
+.card.on{box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 var(--glow-size) -4px var(--c),var(--tape-shadow)}
+.card:focus-visible{outline:2px solid var(--c);outline-offset:4px}
+.card .head{display:flex;align-items:center;gap:12px;flex:none}
+.num{font-family:var(--mono);font-style:italic;font-weight:500;font-size:30px;line-height:1;color:var(--c);letter-spacing:-.03em;flex:none}
+.strip{
+  flex:1;min-width:0;height:46px;display:flex;flex-direction:column;justify-content:center;padding:0 16px;
+  background:linear-gradient(170deg,#f4ecd8,#e6d9bc);color:#1d1a24;transform:rotate(var(--rot,0deg));
+  clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
+}
+.strip .t{font-family:var(--hand);font-size:20px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip .sub{font-family:var(--mono);font-style:italic;font-size:9px;color:#6b624f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.window{
+  flex:1;min-height:0;background:linear-gradient(180deg,#07070a,#0d0c12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:space-around;padding:0 12%;
+  clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);
+}
+.reel{
+  height:74%;aspect-ratio:1;border-radius:50%;
+  background:
+    radial-gradient(circle,#07070a 0 16%,transparent 17%),
+    repeating-conic-gradient(rgba(255,255,255,.78) 0 14deg,transparent 14deg 60deg),
+    #2a2933;
+  box-shadow:0 0 0 2px #2a2933;
+}
+.card.on .reel{animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none}
+.meta{font-family:var(--mono);font-style:italic;font-size:9px;letter-spacing:.16em;color:#77748a;white-space:nowrap}
+.open{
+  font-family:var(--sans);font-style:italic;font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  background:#2a2933;color:#77748a;padding:.6em 1.4em;white-space:nowrap;transition:background .2s,color .2s;
+  clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
+}
+.card.on .open{background:var(--c);color:#0b0a10}
+.card.on:hover .open{background:#fff}
+@media (max-width:560px){ .hint{font-size:9px} }
 </style>
 </head>
 <body>
 
 <section id="tapes" aria-label="Kassetten">
-  <div class="scene">
-    <div class="aura"></div>
-    <div id="stage"></div>
-  </div>
+  <div class="aura"></div>
   <div class="hud top">
     <span class="logo">ARCH<i>I</i>V</span>
     <div class="hud-right">
@@ -231,11 +201,11 @@ img{image-rendering:auto}
       <button id="sound" type="button">SOUND AN</button>
     </div>
   </div>
+  <div class="deck" id="deck" role="listbox" aria-label="Kassetten"></div>
   <div class="hud bottom">
-    <div class="bars" id="bars"></div>
+    <div class="segs" id="segs"></div>
     <div id="counter">TAPE <span id="cnum">1</span>/<span id="ctotal">5</span></div>
-    <button id="open" type="button">KASSETTE ÖFFNEN ▶</button>
-    <div class="hint" id="hint">← → BLÄTTERN · ENTER ÖFFNEN · F UMDREHEN</div>
+    <div class="hint" id="hint">← → BLÄTTERN · ENTER ÖFFNEN</div>
   </div>
 </section>
 
@@ -313,7 +283,7 @@ const streak = document.getElementById("streak");
 const skip = document.getElementById("skip");
 const isTouch = matchMedia("(pointer: coarse)").matches;
 skip.textContent = isTouch ? "TIPPEN ZUM ÜBERSPRINGEN" : "KLICKEN ZUM ÜBERSPRINGEN";
-document.getElementById("hint").textContent = isTouch ? "WISCHEN · TIPPEN ÖFFNET · HALTEN DREHT" : "← → BLÄTTERN · ENTER ÖFFNEN · F UMDREHEN";
+document.getElementById("hint").textContent = isTouch ? "WISCHEN · TIPPEN ÖFFNET" : "← → BLÄTTERN · 1–5 SPRINGEN · ENTER ÖFFNEN";
 
 const SLICES = 18;
 const slices = [];
@@ -369,89 +339,103 @@ setTimeout(dissolve, 80 + 400 + 520);   // kurz schwarz, Schriftzug rein, gut ei
 welcome.addEventListener("click", () => { initAudio(); dissolve(); });
 addEventListener("keydown", e => { if (!welcomeDone && (e.key === "Enter" || e.key === " ")) dissolve(); });
 
-/* ================= TAPES ================= */
+/* ================= KARTEN-REIHE ================= */
 const tapesView = document.getElementById("tapes");
-const stage = document.getElementById("stage");
-const barsEl = document.getElementById("bars");
+const deck = document.getElementById("deck");
+const segsEl = document.getElementById("segs");
 const cnum = document.getElementById("cnum");
-const tapeEls = TAPES.map((t, i) => {
+const N = TAPES.length;
+const SKEW = -9;                       // Kursiv-Schräglage der Karten in Grad
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+document.getElementById("ctotal").textContent = N;
+
+let pos = 0, target = 0, current = -1, interactive = false, leaving = false, introStart = -1;
+let scale = 1, gap = 300, dragMoved = false;
+{ const saved = parseInt(store.get("archiv.tape"), 10); if (saved >= 0 && saved < N) pos = target = saved; }
+
+const cards = TAPES.map((t, i) => {
   const w = WEAR[i % WEAR.length];
-  const el = document.createElement("div");
-  el.className = "tape";
+  const el = document.createElement("button");
+  el.type = "button"; el.className = "card";
+  el.setAttribute("role", "option");
+  el.setAttribute("aria-label", t.title + (t.subject ? ", " + t.subject : ""));
   el.style.setProperty("--c", t.color);
-  el.style.setProperty("--c-glow", hexA(t.color, 0.45));
   el.innerHTML = `
-    <div class="face f-front">
-      <div class="label" style="--rot:${w.rot}deg">
-        <i class="tp tp1${w.tp[0] ? " on" : ""}"></i><i class="tp tp2${w.tp[1] ? " on" : ""}"></i>
-        <div class="txt"><div class="k">ARCHIV · VHS</div><div class="t">${esc(t.title)}</div>${t.subject ? `<div class="sub">${esc(t.subject)}</div>` : ""}</div><div class="n">${esc(t.num)}</div>
-      </div>
-      <div class="window"><div class="reel"></div><div class="reel"></div></div>
-      <div class="brand">E-180</div>
+    <div class="head">
+      <span class="num">${esc(t.num)}</span>
+      <span class="strip" style="--rot:${w.rot * 0.6}deg"><span class="t">${esc(t.title)}</span>${t.subject ? `<span class="sub">${esc(t.subject)}</span>` : ""}</span>
     </div>
-    <div class="face f-back"><div class="back-txt">ARCHIV<br><em>${esc(t.title)}</em><br>NR. ${esc(t.num)} / ${String(TAPES.length).padStart(2, "0")}<br>${t.subject ? esc(t.subject) : "SP · 180 MIN"}</div></div>
-    <div class="face f-right"></div>
-    <div class="face f-left"></div>
-    <div class="face f-top"><div class="spine"><span>${esc(t.title)}</span><b>${esc(t.num)}</b></div></div>
-    <div class="face f-bottom"></div>`;
-  // Klick auf die vordere Kassette öffnet sie, Klick auf eine andere holt sie nach vorne
+    <div class="window"><div class="reel"></div><div class="reel"></div></div>
+    <div class="foot"><span class="meta">ARCHIV · VHS · E-180</span><span class="open">Öffnen ▶</span></div>`;
+  // Klick auf die vordere Karte öffnet sie, Klick auf eine andere holt sie nach vorne
   el.addEventListener("click", () => {
-    if (dragMoved || longPressed || !interactive) return;
+    if (!interactive || dragMoved) return;
     if (i === current && Math.abs(pos - i) < 0.3) openTape(i); else goTo(i);
   });
-  stage.appendChild(el);
-  const bar = document.createElement("button");
-  bar.type = "button"; bar.setAttribute("aria-label", t.title); bar.innerHTML = "<i></i>";
-  bar.addEventListener("click", e => { e.stopPropagation(); if (e.detail) bar.blur(); if (interactive) goTo(i); });
-  barsEl.appendChild(bar);
+  deck.appendChild(el);
+  const seg = document.createElement("button");
+  seg.type = "button"; seg.setAttribute("aria-label", t.title); seg.innerHTML = "<i></i>";
+  seg.addEventListener("click", e => { e.stopPropagation(); if (e.detail) seg.blur(); if (interactive) goTo(i); });
+  segsEl.appendChild(seg);
   return el;
 });
-const bars = [...barsEl.children];
-const N = TAPES.length;
-
-let pos = 0, target = 0, current = -1, scale = 1, introStart = -1, interactive = false;
-// QoL: remember last viewed tape
-const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
-{ const saved = parseInt(store.get("archiv.tape"), 10); if (saved >= 0 && saved < TAPES.length) pos = target = saved; }
-// QoL: flip the active tape (double click / long press / F)
-let flipped = false, flipAngle = 0, longPressed = false;
-function toggleFlip() { flipped = !flipped; tone(flipped ? 520 : 780, 0, 0.06, "triangle", 0.05, flipped ? 260 : -260); }
-// QoL: tilt with mouse / device orientation
-let tiltX = 0, tiltY = 0, tiltTX = 0, tiltTY = 0, baseBeta = null;
-addEventListener("mousemove", e => { tiltTX = (e.clientX / innerWidth) * 2 - 1; tiltTY = (e.clientY / innerHeight) * 2 - 1; });
-document.addEventListener("mouseleave", () => { tiltTX = tiltTY = 0; });
-function onOrient(e) {
-  if (e.gamma == null || e.beta == null) return;
-  if (baseBeta === null) baseBeta = e.beta;
-  tiltTX = clamp(e.gamma / 25, -1, 1);
-  tiltTY = clamp((e.beta - baseBeta) / 25, -1, 1);
-}
-let orientAsked = false;
-function enableOrientation() {
-  if (orientAsked || !window.DeviceOrientationEvent) return;
-  orientAsked = true;
-  if (typeof DeviceOrientationEvent.requestPermission === "function") {
-    DeviceOrientationEvent.requestPermission().then(r => { if (r === "granted") addEventListener("deviceorientation", onOrient); }).catch(() => {});
-  } else addEventListener("deviceorientation", onOrient);
-}
-if (isTouch) addEventListener("pointerup", enableOrientation);
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const easeOutBack = x => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const segs = [...segsEl.children];
 
 function layout() {
-  scale = clamp(Math.min(innerWidth / 470, innerHeight / 540), 0.55, 1.4);
-  stage.style.transform = `scale3d(${scale},${scale},${scale})`;
+  const dw = deck.clientWidth || innerWidth, dh = deck.clientHeight || innerHeight * 0.6;
+  scale = clamp(Math.min(dw / 440, dh / 290), 0.6, 1.55);
+  gap = Math.min(300 * scale, dw * 0.74);
+  kick();
 }
 addEventListener("resize", layout);
-layout();
+
+function goTo(i) { target = clamp(Math.round(i), 0, N - 1); kick(); }
+
+/* Render-Schleife läuft nur, solange sich etwas bewegt (spart Akku) */
+let running = false, last = 0;
+function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  pos += (target - pos) * (1 - Math.exp(-dt * 11));
+  if (Math.abs(target - pos) < 0.001) pos = target;
+  const introT = introStart < 0 ? 0 : (now - introStart) / 1000;
+  let introBusy = false;
+  cards.forEach((el, i) => {
+    const d = i - pos, ad = Math.abs(d);
+    const near = Math.min(ad, 1);
+    const p = clamp((introT - Math.abs(i - Math.round(pos)) * 0.06) / 0.45, 0, 1);
+    if (p < 1) introBusy = true;
+    const x = d * gap - Math.sign(d) * Math.max(0, ad - 1) * gap * 0.22 + (1 - easeOut(p)) * innerWidth;
+    const sc = scale * (1 - near * 0.26 - Math.max(0, ad - 1) * 0.06);
+    el.style.transform = `translate3d(${x.toFixed(1)}px,${(near * 10).toFixed(1)}px,0) skewX(${SKEW}deg) scale(${sc.toFixed(4)})`;
+    el.style.opacity = (introStart < 0 ? 0 : Math.max(0.12, 1 - near * 0.45 - Math.max(0, ad - 1) * 0.3)).toFixed(3);
+    el.style.zIndex = 10 - Math.round(ad * 2);
+    el.classList.toggle("on", ad < 0.5);
+  });
+  const idx = clamp(Math.round(pos), 0, N - 1);
+  if (idx !== current) {
+    if (current !== -1) beep();
+    current = idx;
+    store.set("archiv.tape", idx);
+    cnum.textContent = idx + 1;
+    tapesView.style.setProperty("--cc", TAPES[idx].color);
+    tapesView.style.setProperty("--cc-soft", hexA(TAPES[idx].color, 0.15));
+    segs.forEach((b, j) => b.classList.toggle("on", j === idx));
+    cards.forEach((el, j) => el.setAttribute("aria-selected", j === idx ? "true" : "false"));
+  }
+  if (pos !== target || introBusy || dragging) requestAnimationFrame(frame); else running = false;
+}
 
 function openTapes() {
   introStart = performance.now();
-  setTimeout(() => { tapesView.classList.add("ready"); interactive = true; }, 700);
+  tapesView.classList.add("ready");
+  layout();
+  setTimeout(() => { interactive = true; }, 300);
 }
-function goTo(i) { target = clamp(Math.round(i), 0, N - 1); }
+
 // Kassette öffnen -> eigene Seite (aus data/tapes.js)
-let leaving = false;
 function openTape(i) {
   const t = TAPES[i];
   if (!t || !t.page || leaving) return;
@@ -459,58 +443,12 @@ function openTape(i) {
   store.set("archiv.tape", i);
   tone(440, 0, 0.06, "square", 0.04); tone(660, 0.06, 0.08, "square", 0.04);
   tapesView.classList.add("leaving");
-  setTimeout(() => { location.href = t.page; }, 220);
+  setTimeout(() => { location.href = t.page; }, 200);
 }
-document.getElementById("open").addEventListener("click", e => { e.stopPropagation(); if (interactive) openTape(current); });
 // "Zurück" im Browser (bfcache): Ansicht wieder einblenden
 addEventListener("pageshow", e => { if (e.persisted) { leaving = false; tapesView.classList.remove("leaving"); } });
-document.getElementById("ctotal").textContent = N;
-addEventListener("contextmenu", e => { if (interactive) e.preventDefault(); });
 
-let last = performance.now();
-function render(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  pos += (target - pos) * (1 - Math.exp(-dt * 8));
-  if (Math.abs(target - pos) < 0.0005) pos = target;
-  const t = now / 1000;
-  const k = 1 - Math.exp(-dt * 6);
-  tiltX += (tiltTX - tiltX) * k; tiltY += (tiltTY - tiltY) * k;
-  flipAngle += ((flipped ? 180 : 0) - flipAngle) * (1 - Math.exp(-dt * 7));
-  const introT = introStart < 0 ? 0 : (now - introStart) / 1000;
-  tapeEls.forEach((el, i) => {
-    // intro: each tape unfolds from below, staggered from the centre outwards
-    const p = clamp((introT - Math.abs(i - pos) * 0.09) / 0.9, 0, 1);
-    const ip = easeOutBack(p);
-    const d = i - pos, ad = Math.abs(d), s = Math.sign(d);
-    const near = Math.min(ad, 1), far = Math.max(ad - 1, 0);
-    const x = s * (near * 250 + far * 80) * Math.min(1, ip);
-    const z = -near * 180 - far * 140;
-    const act = Math.max(0, 1 - ad);
-    const ry = -s * near * 58 + 14 * act + Math.sin(t * 1.1) * 5 * act + (-d * 6) * act + tiltX * 16 * act + flipAngle * act * act;
-    const rx = Math.sin(t * 0.8) * 2 * act - tiltY * 10 * act;
-    const y = Math.sin(t * 1.4) * 5 * act - act * 12;
-    const introY = (1 - ip) * 260, introRX = (1 - ip) * -75;
-    el.style.transform = `translate3d(${x}px,${y + introY}px,${z + act * 70}px) rotateY(${ry}deg) rotateX(${rx + introRX}deg)`;
-    el.style.setProperty("--dim", Math.max(1 - p, Math.min(0.8, ad * 0.4)).toFixed(3));
-    el.style.setProperty("--glow", (act * act * p).toFixed(3));
-    el.classList.toggle("active", ad < 0.5);
-  });
-  const idx = clamp(Math.round(pos), 0, N - 1);
-  if (idx !== current) {
-    if (current !== -1) beep();
-    current = idx;
-    flipped = false;
-    store.set("archiv.tape", idx);
-    cnum.textContent = idx + 1;
-    tapesView.style.setProperty("--cc", TAPES[idx].color);
-    tapesView.style.setProperty("--cc-soft", hexA(TAPES[idx].color, 0.16));
-    bars.forEach((b, j) => b.classList.toggle("on", j === idx));
-  }
-  requestAnimationFrame(render);
-}
-requestAnimationFrame(render);
-
-/* ---- wheel: continuous scroll, soft snap after idle ---- */
+/* ---- Mausrad / Trackpad: frei schieben, nach kurzer Pause weich einrasten ---- */
 let wheelTimer = 0, wheelDir = 1;
 addEventListener("wheel", e => {
   if (!interactive) return;
@@ -518,59 +456,51 @@ addEventListener("wheel", e => {
   let delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
   if (e.deltaMode === 1) delta *= 32; else if (e.deltaMode === 2) delta *= 400;
   delta = clamp(delta, -120, 120);
-  target = clamp(target + delta * 0.0045, -0.35, N - 0.65);
+  target = clamp(target + delta * 0.0045, -0.3, N - 0.7);
   wheelDir = Math.sign(delta) || wheelDir;
+  kick();
   clearTimeout(wheelTimer);
-  wheelTimer = setTimeout(() => goTo(wheelDir > 0 ? Math.ceil(target - 0.2) : Math.floor(target + 0.2)), 140);
+  // ein Dreh am Mausrad bewegt immer mindestens eine Karte
+  wheelTimer = setTimeout(() => goTo(wheelDir > 0 ? Math.ceil(target - 0.2) : Math.floor(target + 0.2)), 130);
 }, { passive: false });
 
-/* ---- keys ---- */
+/* ---- Tasten ---- */
 addEventListener("keydown", e => {
   if (!interactive) return;
   const k = e.key;
-  if (k >= "1" && k <= String(N)) { goTo(+k - 1); return; }
-  if (k === "f" || k === "F") { toggleFlip(); return; }
-  if (k === "Enter" || k === " ") { e.preventDefault(); openTape(current); return; }
-  if (k === "ArrowRight" || k === "ArrowDown") { e.preventDefault(); goTo(Math.round(target) + 1); }
+  if (k >= "1" && k <= String(Math.min(9, N))) { goTo(+k - 1); return; }
+  if (k === "Enter" || k === " ") { e.preventDefault(); openTape(clamp(Math.round(target), 0, N - 1)); }
+  else if (k === "ArrowRight" || k === "ArrowDown") { e.preventDefault(); goTo(Math.round(target) + 1); }
   else if (k === "ArrowLeft" || k === "ArrowUp") { e.preventDefault(); goTo(Math.round(target) - 1); }
   else if (k === "Home") goTo(0);
   else if (k === "End") goTo(N - 1);
 });
 
-/* ---- swipe / drag ---- */
-let lpTimer = 0, dragging = false, dragMoved = false, axis = 0, sx = 0, sy = 0, sTarget = 0, lastP = 0, lastT = 0, vel = 0;
+/* ---- Wischen / Ziehen (seitlich), mit Schwung ---- */
+let dragging = false, sx = 0, sTarget = 0, lastX = 0, lastT = 0, vel = 0;
 tapesView.addEventListener("pointerdown", e => {
-  if (!interactive || e.target.closest("button")) return;
-  dragging = true; dragMoved = false; longPressed = false;
-  sx = e.clientX; sy = e.clientY; sTarget = target; lastT = performance.now(); vel = 0;
-  // long press on the active tape flips it
-  clearTimeout(lpTimer);
-  const hit = e.target.closest(".tape");
-  if (hit && tapeEls.indexOf(hit) === current) {
-    lpTimer = setTimeout(() => { if (dragging && !dragMoved) { longPressed = true; toggleFlip(); if (navigator.vibrate) navigator.vibrate(15); } }, 480);
-  }
+  if (!interactive || e.target.closest(".hud button")) return;
+  dragging = true; dragMoved = false;
+  sx = lastX = e.clientX; sTarget = target; lastT = performance.now(); vel = 0;
 });
 addEventListener("pointermove", e => {
   if (!dragging) return;
-  const dx = e.clientX - sx, dy = e.clientY - sy;
-  if (!dragMoved) {
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
-    dragMoved = true; clearTimeout(lpTimer); axis = Math.abs(dx) >= Math.abs(dy) ? 0 : 1;
-    lastP = axis ? e.clientY : e.clientX;
-  }
-  const delta = axis ? dy : dx, cur = axis ? e.clientY : e.clientX;
-  target = clamp(sTarget - delta / (230 * scale), -0.35, N - 0.65);
+  const dx = e.clientX - sx;
+  if (!dragMoved && Math.abs(dx) < 8) return;
+  dragMoved = true;
+  target = clamp(sTarget - dx / gap, -0.3, N - 0.7);
   const now = performance.now();
-  vel = (cur - lastP) / Math.max(1, now - lastT); lastP = cur; lastT = now;
+  vel = (e.clientX - lastX) / Math.max(1, now - lastT); lastX = e.clientX; lastT = now;
+  kick();
 });
 function endDrag() {
   if (!dragging) return;
-  dragging = false; clearTimeout(lpTimer);
-  if (longPressed) setTimeout(() => { longPressed = false; }, 0);
-  if (dragMoved) { goTo(target + clamp(-vel * 0.9, -1.4, 1.4)); setTimeout(() => { dragMoved = false; }, 0); }
+  dragging = false;
+  if (dragMoved) { goTo(target + clamp(-vel * 0.35, -0.5, 0.5)); setTimeout(() => { dragMoved = false; }, 0); }
 }
 addEventListener("pointerup", endDrag);
 addEventListener("pointercancel", endDrag);
+addEventListener("contextmenu", e => { if (interactive && isTouch) e.preventDefault(); });
 
 /* ---- sound toggle ---- */
 const soundBtn = document.getElementById("sound");
@@ -581,6 +511,7 @@ soundBtn.addEventListener("click", e => {
   soundBtn.classList.toggle("off", !soundOn);
   if (soundOn) { initAudio(); beep(); }
 });
+layout();
 })();
 </script>
 </body>

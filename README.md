@@ -2,27 +2,27 @@
 
 **▶ Live ansehen: [michi3445.github.io/Archive-vhs-s](https://michi3445.github.io/Archive-vhs-s/)**
 
-Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten in echtem 3D, durch die man scrollen, wischen und klicken kann. Davor läuft ein kurzer Startscreen mit ASCII-Schriftzug.
+Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten als schräge, kantige Karten in einer Reihe, durch die man seitlich scrollen, wischen und klicken kann. Davor läuft ein kurzer Startscreen mit ASCII-Schriftzug.
 
 Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist reines HTML, CSS und JavaScript, ohne Build-Schritt und ohne Bibliotheken.
 
 ## Ablauf
 
 1. **Startscreen:** Schwarzer Bildschirm mit kantigem, kursivem ASCII-Schriftzug „ARCHIV“ und „Made by Michi“. Nach einem kurzen Moment **verzischt** alles zu beiden Seiten. Der Start läuft bei jedem Laden und dauert insgesamt höchstens 2 Sekunden.
-2. Die **Kassetten klappen auf**.
+2. Die **Kassetten-Karten fliegen von rechts herein**. Die mittlere ist groß und leuchtet, die anderen sind kleiner und blasser.
 3. **Kassette öffnen** führt zu ihrer eigenen Seite mit einem **Lernkarten-Trainer**.
 
 ## Steuerung
 
 | Aktion | Desktop | Handy |
 | --- | --- | --- |
-| Nächste / vorige Kassette | Mausrad, Pfeiltasten, Ziehen | Wischen |
-| Direkt zu Kassette springen | Tasten `1`–`5` oder Balken unten | Balken unten antippen |
-| Kassette öffnen | Klick auf die vordere Kassette, `Enter` oder „Kassette öffnen“ | Vordere Kassette antippen |
-| Kassette umdrehen | `F` oder Maustaste gedrückt halten | Lange drücken |
-| Kassette neigen | Maus bewegen | Handy neigen |
+| Nächste / vorige Kassette | Mausrad, Pfeiltasten, Ziehen | Seitlich wischen |
+| Direkt zu Kassette springen | Tasten `1`–`5`, Balken unten oder Klick auf eine Karte | Balken oder Karte antippen |
+| Kassette öffnen | Klick auf die mittlere Karte oder `Enter` | Mittlere Karte antippen |
 | Tag / Nacht | Knopf oben rechts (AUTO → TAG → NACHT) | genauso |
 | Ton an / aus | Knopf oben rechts | Knopf oben rechts |
+
+Die Reihe rastet nach dem Scrollen weich auf der nächsten Karte ein.
 
 **Auf einer Kassetten-Seite:** Karte antippen oder `Leertaste` deckt die Antwort auf. Dann „✓ Gewusst“ (`→`) oder „✗ Nochmal“ (`←`). Falsche Karten kommen am Ende noch einmal dran. `Esc` führt zurück zum Archiv.
 
@@ -89,7 +89,7 @@ window.CARDS = [
 ## Aufbau
 
 ```
-index.html          Startseite: Startscreen + Kassetten in 3D
+index.html          Startseite: Startscreen + Karten-Reihe
 data/tapes.js       Liste aller Kassetten (Titel, Fach, Farbe, Seite)
 assets/theme.js     Tag/Nacht-Umschaltung (für alle Seiten)
 tapes/tape-01.html  Seite pro Kassette, mit den Lernkarten
@@ -99,7 +99,7 @@ tapes/trainer.js    Lernkarten-Trainer (für alle Kassetten gleich)
 
 ## Technik
 
-- 3D mit CSS-Transforms (`preserve-3d`), ohne WebGL
+- Karten-Reihe nur mit 2D-CSS-Transforms, die Animation läuft nur, solange sich etwas bewegt
 - Schriften von Google Fonts: Inter, JetBrains Mono, VT323, Permanent Marker. Ohne Internet greift eine Systemschrift.
 - Getestet in Chromium auf Desktop und im iPhone-Format
 
