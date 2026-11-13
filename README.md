@@ -2,13 +2,13 @@
 
 **▶ Live ansehen: [michi3445.github.io/Archive-vhs-s](https://michi3445.github.io/Archive-vhs-s/)**
 
-Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten in echtem 3D, durch die man scrollen, wischen und klicken kann. Davor läuft ein Startscreen im Stil eines alten Videorecorders.
+Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten in echtem 3D, durch die man scrollen, wischen und klicken kann. Davor läuft ein kurzer Startscreen mit ASCII-Schriftzug.
 
 Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist reines HTML, CSS und JavaScript, ohne Build-Schritt und ohne Bibliotheken.
 
 ## Ablauf
 
-1. **Startscreen:** Die Kassette wird eingelegt (kurzes Rauschen). Dann kommt der blaue VHS-Bildschirm mit `▶ PLAY`, Zeitzähler, `CH 03` und „WELCOME TO ARCHIV“. Nach rund einer Sekunde **verzischt** der Schriftzug zu beiden Seiten.
+1. **Startscreen:** Schwarzer Bildschirm mit kantigem, kursivem ASCII-Schriftzug „ARCHIV“ und „Made by Michi“. Nach rund einer Sekunde **verzischt** alles zu beiden Seiten.
 2. Die **Kassetten klappen auf**. Der Startscreen kommt nur einmal pro Browser-Sitzung, nach „Zurück“ von einer Kassette geht es direkt weiter.
 3. **Kassette öffnen** führt zu ihrer eigenen Seite mit einem **Lernkarten-Trainer**.
 

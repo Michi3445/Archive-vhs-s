@@ -59,67 +59,54 @@ img{image-rendering:auto}
 /* very light film grain, the only retro hint on top of everything */
 #grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:var(--grain);z-index:50}
 
-/* ---------- Welcome ---------- */
+/* ---------- Welcome: schwarz, kantig, kursiv, ASCII ---------- */
 #welcome{
-  position:fixed;inset:0;z-index:20;background:#1428c8;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  font-family:"VT323",ui-monospace,monospace;color:#fff;
-  --vcr:#1428c8;
+  position:fixed;inset:0;z-index:20;background:#000;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:#fff;
 }
-#welcome::before{ /* colour bleed + soft vignette like an old tape */
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,30,.55) 100%);
+/* feine diagonale Linien + zwei kantige Ecken */
+#welcome::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.035) 22px 23px);
 }
-#welcome.boot{background:#000}
-#welcome.gone{pointer-events:none;background:transparent;transition:background .5s ease .3s}
-#welcome.gone .osd,#welcome.gone .vfx,#welcome.gone .vtrack{opacity:0;transition:opacity .25s}
-.vfx{position:absolute;inset:0;pointer-events:none;z-index:3}
-.vscan{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.22) 0 2px,transparent 2px 4px)}
-.vtrack{
-  position:absolute;left:0;right:0;height:9vh;top:-12vh;pointer-events:none;z-index:4;
-  background:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 2px,transparent 2px 9px,rgba(255,255,255,.12) 9px 10px,transparent 10px 23px,rgba(255,255,255,.18) 23px 26px,transparent 26px 41px),
-    linear-gradient(to bottom,transparent,rgba(255,255,255,.12) 45%,rgba(255,255,255,.2) 55%,transparent);
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 35%,#000 65%,transparent);
-  mask-image:linear-gradient(to bottom,transparent,#000 35%,#000 65%,transparent);
-  height:5vh;filter:blur(.8px);
-  animation:track 2.6s linear infinite;
-}
-@keyframes track{to{transform:translateY(125vh)}}
-#welcome.boot .vtrack{animation-duration:.5s}
-.osd{position:absolute;z-index:2;font-size:clamp(22px,3.4vw,40px);letter-spacing:.06em;line-height:1;
-  text-shadow:2px 0 0 rgba(255,0,80,.6),-2px 0 0 rgba(0,220,255,.6)}
-.osd.tl{top:max(22px,5vh);left:max(22px,5vw)}
-.osd.tr{top:max(22px,5vh);right:max(22px,5vw)}
-.osd.bl{bottom:max(22px,6vh);left:max(22px,5vw)}
-.osd.br{bottom:max(22px,6vh);right:max(22px,5vw)}
-.osd .blink{animation:cur 1s steps(1) infinite}
-#welcome.boot .osd,#welcome.boot .wtext{visibility:hidden}
-.wtext{position:relative;text-align:center;line-height:1}
+.corner{position:absolute;width:clamp(40px,7vw,90px);height:clamp(40px,7vw,90px);pointer-events:none;z-index:2}
+.corner.c1{top:max(20px,4vh);left:max(20px,4vw);border-top:2px solid var(--pink);border-left:2px solid var(--pink);transform:skewX(-12deg);transform-origin:top left}
+.corner.c2{bottom:max(20px,4vh);right:max(20px,4vw);border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan);transform:skewX(-12deg);transform-origin:bottom right}
+#welcome.gone{pointer-events:none;background:transparent;transition:background .45s ease .2s}
+#welcome.gone::before,#welcome.gone .corner{opacity:0;transition:opacity .2s}
+#welcome.boot .wtext,#welcome.boot .corner{visibility:hidden}
+.wtext{position:relative;z-index:2;text-align:center;line-height:1}
 .wtext .slice{position:absolute;inset:0;will-change:transform,opacity,filter}
 .wtext .ghost{visibility:hidden}
-.wtext{z-index:2}
-.w-small{
-  display:block;font-size:clamp(26px,4.4vw,48px);letter-spacing:.32em;text-indent:.32em;margin-bottom:.2em;
-  text-shadow:2px 0 0 rgba(255,0,80,.7),-2px 0 0 rgba(0,220,255,.7);
+.w-top{
+  display:block;font-family:var(--sans);font-style:italic;font-weight:500;
+  font-size:clamp(10px,1.5vw,14px);letter-spacing:.5em;text-indent:.5em;color:#8d8a9c;margin-bottom:clamp(14px,2.4vw,26px);
 }
-.w-big{
-  display:block;font-size:clamp(84px,22vw,250px);letter-spacing:.06em;text-indent:.06em;line-height:.85;
-  text-shadow:4px 0 0 rgba(255,0,90,.75),-4px 0 0 rgba(0,230,255,.75),0 0 30px rgba(255,255,255,.35);
+.w-ascii{
+  display:block;margin:0;font-family:var(--mono);font-weight:500;white-space:pre;text-align:left;
+  font-size:clamp(7.5px,3.4vw,27px);line-height:1.12;letter-spacing:0;
+  background:linear-gradient(100deg,var(--pink),var(--lila) 50%,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.wtext.in{animation:welcomeIn .55s steps(8) both}
-@keyframes welcomeIn{0%{opacity:0;transform:scaleY(.02)}30%{opacity:1;transform:scaleY(.02) scaleX(1.3)}60%{transform:scaleY(1.15) skewX(-8deg)}80%{transform:translateX(6px)}100%{opacity:1;transform:none}}
-.wjit{animation:jit 2.3s steps(1) infinite}
-@keyframes jit{0%,100%{transform:none}41%{transform:translateX(-5px) skewX(4deg)}42%{transform:none}77%{transform:translateX(7px)}78%{transform:none}79%{transform:translateX(-3px)}80%{transform:none}}
-.wcursor{display:inline-block;width:.5em;height:.8em;background:#fff;vertical-align:-.05em;margin-left:.15em;animation:cur 1s steps(1) infinite}
+.w-rule{display:block;height:2px;margin:clamp(14px,2.4vw,26px) 0 clamp(12px,2vw,20px);background:linear-gradient(90deg,var(--pink),var(--cyan));transform:skewX(-30deg)}
+.w-by{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font-family:var(--sans);font-style:italic;font-weight:800;text-transform:uppercase;
+  font-size:clamp(12px,2vw,20px);letter-spacing:.22em;
+}
+.w-by b{font-weight:800;color:#000;background:#fff;padding:.25em .9em;letter-spacing:.16em;clip-path:polygon(.7em 0,100% 0,calc(100% - .7em) 100%,0 100%)}
+.w-by i{font-family:var(--mono);font-style:italic;font-weight:400;font-size:.62em;color:#8d8a9c;letter-spacing:.2em}
+/* Einblenden: kantiger Wisch von links */
+.wtext.in{animation:welcomeIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes welcomeIn{from{clip-path:polygon(0 0,0 0,-12% 100%,-12% 100%);transform:translateX(-18px)}to{clip-path:polygon(0 0,112% 0,100% 100%,-12% 100%);transform:none}}
 @keyframes cur{50%{opacity:0}}
 /* the streak that shoots out to both sides */
 .streak{
-  position:absolute;left:50%;top:50%;height:2px;width:100vw;margin-left:-50vw;margin-top:-1px;
+  position:absolute;left:50%;top:50%;height:2px;width:100vw;margin-left:-50vw;margin-top:-1px;z-index:3;
   background:linear-gradient(90deg,transparent,var(--cyan) 30%,#fff 50%,var(--pink) 70%,transparent);
   transform:scaleX(0);opacity:0;filter:drop-shadow(0 0 6px rgba(255,255,255,.7));
 }
-.skip{position:absolute;z-index:2;bottom:max(22px,6vh);font-size:clamp(18px,2.4vw,24px);color:rgba(255,255,255,.75);letter-spacing:.1em;animation:cur 1.2s steps(1) infinite}
+.skip{position:absolute;z-index:2;bottom:max(22px,5vh);font-family:var(--mono);font-style:italic;font-size:10px;color:#4a4858;letter-spacing:.2em}
 
 /* ---------- Tape view ---------- */
 #tapes{position:fixed;inset:0;touch-action:none;background:var(--room);transition:opacity .25s ease,transform .25s ease}
@@ -253,14 +240,13 @@ img{image-rendering:auto}
 </section>
 
 <div id="welcome" class="boot" aria-label="Willkommen">
-  <div class="osd tl"><span class="blink">▶</span> PLAY</div>
-  <div class="osd tr">SP</div>
-  <div class="osd bl" id="tc">0:00:00</div>
-  <div class="osd br">CH 03</div>
-  <div class="vfx vscan"></div>
-  <div class="vtrack"></div>
+  <i class="corner c1"></i><i class="corner c2"></i>
   <div class="wtext" id="wtext">
-    <div class="ghost" id="wsrc"><span class="w-small">WELCOME TO<span class="wcursor"></span></span><span class="w-big">ARCHIV</span></div>
+    <div class="ghost" id="wsrc"><span class="w-top">WELCOME TO</span><pre class="w-ascii" aria-label="ARCHIV">    ___    ____  ________  _______    __
+   /   |  / __ \/ ____/ / / /  _/ |  / /
+  / /| | / /_/ / /   / /_/ // / | | / /
+ / ___ |/ _, _/ /___/ __  // /  | |/ /
+/_/  |_/_/ |_|\____/_/ /_/___/  |___/</pre><span class="w-rule"></span><span class="w-by"><b>Made by Michi</b><i>// EST. 2026</i></span></div>
   </div>
   <div class="streak" id="streak"></div>
   <div class="skip" id="skip">KLICKEN ZUM ÜBERSPRINGEN</div>
@@ -340,18 +326,11 @@ for (let i = 0; i < SLICES; i++) {
   wtext.appendChild(s);
   slices.push(s);
 }
-// tape "inserted": black + fast tracking noise, then the blue VCR screen appears
-const tc = document.getElementById("tc");
-const t0 = performance.now();
-const tcTimer = setInterval(() => {
-  const s = (performance.now() - t0) / 1000, f = Math.floor((s % 1) * 30);
-  tc.textContent = `0:00:${String(Math.floor(s)).padStart(2, "0")}:${String(f).padStart(2, "0")}`;
-}, 33);
+// kurz schwarz, dann wischt der Schriftzug herein
 setTimeout(() => {
   welcome.classList.remove("boot");
   wtext.classList.add("in");
-  setTimeout(() => wtext.classList.add("wjit"), 550);
-}, 250);
+}, 200);
 
 let welcomeDone = false;
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -383,7 +362,6 @@ async function dissolve() {
   welcome.classList.add("gone");
   await Promise.all(anims);
   await wait(250);
-  clearInterval(tcTimer);
   welcome.remove();
 }
 // schnell: den Startscreen nur einmal pro Browser-Sitzung zeigen (z. B. nicht nach "Zurück" von einer Kassette)
@@ -391,11 +369,10 @@ let seenWelcome = false;
 try { seenWelcome = sessionStorage.getItem("archiv.welcome") === "1"; sessionStorage.setItem("archiv.welcome", "1"); } catch (e) {}
 if (seenWelcome) {
   welcomeDone = true;
-  clearInterval(tcTimer);
   welcome.remove();
   setTimeout(() => { introStart = performance.now() - 10000; tapesView.classList.add("ready"); interactive = true; }, 0);
 } else {
-  setTimeout(dissolve, 250 + 550 + 1000);   // insert, title in, then 1 second hold
+  setTimeout(dissolve, 200 + 500 + 1100);   // insert, title in, then 1 second hold
 }
 welcome.addEventListener("click", () => { initAudio(); dissolve(); });
 addEventListener("keydown", e => { if (!welcomeDone && (e.key === "Enter" || e.key === " ")) dissolve(); });
