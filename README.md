@@ -1,5 +1,7 @@
 # ARCHIV
 
+**▶ Live ansehen: [michi3445.github.io/Archive-vhs-s](https://michi3445.github.io/Archive-vhs-s/)**
+
 Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten in echtem 3D, durch die man scrollen, wischen und klicken kann. Davor läuft ein Startscreen im Stil eines alten Videorecorders.
 
 Alles steckt in **einer einzigen Datei** (`index.html`): HTML, CSS und JavaScript, ohne Build-Schritt und ohne Bibliotheken.
@@ -32,11 +34,11 @@ Alles steckt in **einer einzigen Datei** (`index.html`): HTML, CSS und JavaScrip
 
 `index.html` einfach im Browser öffnen. Ein Server ist nicht nötig.
 
-### Online stellen mit GitHub Pages
+### Online mit GitHub Pages
 
-1. Im Repo **Settings → Pages** öffnen.
-2. Unter *Source* den Branch `main` und den Ordner `/ (root)` wählen.
-3. Nach etwa einer Minute ist die Seite unter `https://michi3445.github.io/Archive-vhs-s/` erreichbar.
+Die Seite ist über GitHub Pages veröffentlicht: **https://michi3445.github.io/Archive-vhs-s/**
+
+Jeder Push auf `main` aktualisiert die Seite automatisch nach etwa einer Minute.
 
 ## Anpassen
 
