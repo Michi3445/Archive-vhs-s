@@ -40,7 +40,9 @@ Die Reihe rastet nach dem Scrollen weich auf der nächsten Kassette ein.
 - Abgenutzte Etiketten: handgeschriebene Titel, vergilbtes Papier und Klebeband-Reste, bei jeder Kassette etwas anders.
 - Die zuletzt angesehene Kassette wird gemerkt (`localStorage`).
 - Ein kurzer Piepton beim Wechseln, erzeugt mit der Web Audio API. Er spielt erst nach dem ersten Klick, weil Browser vorher keinen Ton erlauben.
-- Schlank gehalten: kein Build-Schritt, kein Dauer-Rauschen, Three.js wird im Hintergrund nachgeladen und blockiert den Start nicht.
+- Schlank gehalten: kein Build-Schritt, keine Körnung, Schriften und Three.js werden im Hintergrund nachgeladen und blockieren den Start nicht.
+- Die Seite misst selbst, wie flüssig sie läuft. Ist ein Gerät für 3D zu langsam (oder rendert nur per Software), wechselt sie automatisch auf die leichte 2D-Karten-Reihe.
+- Zum Vergleichen: `?gl=0` an die Adresse hängen erzwingt die 2D-Reihe, `?gl=1` erzwingt 3D.
 
 ## Starten
 
@@ -102,7 +104,7 @@ tapes/trainer.js    Lernkarten-Trainer (für alle Kassetten gleich)
 ## Technik
 
 - 3D-Kassetten mit WebGL über [Three.js](https://threejs.org/) (r128, von cdnjs). Etiketten werden per Canvas als Texturen gezeichnet.
-- Ersatz ohne WebGL oder ohne Internet: eine flache 2D-Karten-Reihe mit denselben Funktionen
+- Ersatz ohne WebGL, ohne Internet oder auf langsamen Geräten: eine flache 2D-Karten-Reihe mit denselben Funktionen
 - Schriften von Google Fonts: Inter, JetBrains Mono, VT323, Permanent Marker. Ohne Internet greift eine Systemschrift.
 - Getestet in Chromium auf Desktop und im iPhone-Format
 

@@ -6,7 +6,7 @@
 <title>ARCHIV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&family=VT323&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <script src="assets/theme.js"></script>
 <script src="data/tapes.js"></script>
 <style>
@@ -28,7 +28,6 @@
   --hint:#4a4858;
   --glow-size:60px;
   --tape-shadow:0 0 0 transparent;
-  --grain:.035;
 }
 /* TAG: helles Wohnzimmer – Wand oben, Holzboden unten */
 html[data-theme="day"]{
@@ -42,7 +41,6 @@ html[data-theme="day"]{
   --hint:#9a8d7f;
   --glow-size:26px;
   --tape-shadow:0 26px 40px -10px rgba(60,40,20,.45);
-  --grain:.02;
 }
 html[data-theme="day"] .aura{background:radial-gradient(closest-side,rgba(255,236,190,.75),transparent)!important}
 html,body{transition:background .4s}
@@ -57,7 +55,6 @@ body{
 img{image-rendering:auto}
 
 /* very light film grain, the only retro hint on top of everything */
-#grain{position:fixed;inset:0;pointer-events:none;opacity:var(--grain);z-index:50;background-size:256px 256px}
 
 /* ---------- Welcome: schwarz, kantig, kursiv, ASCII ---------- */
 #welcome{
@@ -145,7 +142,7 @@ img{image-rendering:auto}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:none;outline:none}
 #tapes.gl #gl{display:block}
 #tapes.gl .card{display:none}          /* die 2D-Karten sind nur der Ersatz ohne WebGL */
-#tapes.gl .aura{opacity:.55}
+#tapes.gl .aura{display:none}        /* WebGL hat sein eigenes Leuchten */
 .card{
   --c:#9b7bff;--w:340px;--h:214px;
   position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);margin:calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
@@ -226,7 +223,6 @@ img{image-rendering:auto}
   <div class="skip" id="skip">KLICKEN ZUM ÜBERSPRINGEN</div>
 </div>
 
-<div id="grain"></div>
 
 <script>
 (() => {
@@ -246,14 +242,6 @@ const WEAR = [
 ];
 const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
 
-/* ================= GRAIN (einmal erzeugt, danach statisch – keine Dauerlast) ================= */
-(() => {
-  const c = document.createElement("canvas"); c.width = c.height = 128;
-  const g = c.getContext("2d"), im = g.createImageData(128, 128), d = new Uint32Array(im.data.buffer);
-  for (let i = 0; i < d.length; i++) { const v = (Math.random() * 255) | 0; d[i] = 0xff000000 | (v << 16) | (v << 8) | v; }
-  g.putImageData(im, 0, 0);
-  document.getElementById("grain").style.backgroundImage = `url(${c.toDataURL()})`;
-})();
 
 /* ================= AUDIO (unlocked by first interaction) ================= */
 let actx = null, soundOn = true;
@@ -405,7 +393,7 @@ const easeOut = x => 1 - Math.pow(1 - x, 3);
 function frame(now) {
   if (leaving) { running = false; return; }      // beim Öffnen einer Kassette nichts mehr zeichnen
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  pos += (target - pos) * (1 - Math.exp(-dt * 11));
+  pos += (target - pos) * (1 - Math.exp(-dt * 14));
   if (Math.abs(target - pos) < 0.001) pos = target;
   const introT = introStart < 0 ? 0 : (now - introStart) / 1000;
   let introBusy = false;
@@ -461,8 +449,16 @@ async function initGL() {
   } catch (e) {}
 
   const canvas = document.getElementById("gl");
-  const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  const force = new URLSearchParams(location.search).get("gl");    // ?gl=0 erzwingt 2D, ?gl=1 erzwingt 3D
+  if (force === "0") throw new Error("2D erzwungen");
+  const dpr = devicePixelRatio || 1;
+  const renderer = new T.WebGLRenderer({ canvas, antialias: dpr < 2, alpha: true, powerPreference: "high-performance" });
+  // Ohne echte Grafikkarte (Software-Rendering) wäre 3D zäh: dann lieber die leichte 2D-Reihe
+  const ctx = renderer.getContext(), dbg = ctx.getExtension("WEBGL_debug_renderer_info");
+  const gpu = String(dbg ? ctx.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : ctx.getParameter(ctx.RENDERER));
+  if (force !== "1" && /swiftshader|llvmpipe|software|basic render/i.test(gpu)) { renderer.dispose(); throw new Error("Software-Rendering"); }
+  let quality = Math.min(dpr, 1.5);
+  renderer.setPixelRatio(quality);
   renderer.outputEncoding = T.sRGBEncoding;
   const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const scene = new T.Scene();
@@ -548,10 +544,10 @@ async function initGL() {
   const shadowTex = radial("rgba(0,0,0,.75)", "rgba(0,0,0,0)");
   const items = TAPES.map((t, i) => {
     const col = new T.Color(t.color);
-    const std = o => new T.MeshStandardMaterial(Object.assign({ roughness: 0.62, metalness: 0.08 }, o));
+    const std = o => new T.MeshLambertMaterial(o);    // günstigstes beleuchtetes Material
     // BoxGeometry: +x, -x, +y, -y, +z, -z
     const mats = [std({ color: 0x1a1921 }), std({ color: col }), std({ map: topTex(t) }), std({ color: 0x0d0c12 }),
-                  std({ map: frontTex(t, WEAR[i % WEAR.length]), roughness: 0.75 }), std({ map: backTex(t) })];
+                  std({ map: frontTex(t, WEAR[i % WEAR.length]) }), std({ map: backTex(t) })];
     const base = mats.map(m => m.color.clone());
     const group = new T.Group(), mesh = new T.Mesh(box, mats);
     mesh.userData.index = i;
@@ -577,7 +573,8 @@ async function initGL() {
   glow.position.set(0, 0.1, -1.1); scene.add(glow);
 
   let dist = 9, unit = 300, tiltX = 0, tiltY = 0, flipAngle = 0, theme = "";
-  const glowCol = new T.Color(TAPES[0].color);
+  const glowCol = new T.Color(TAPES[0].color), WHITE = new T.Color(0xffffff);
+  let skip = false, carry = 0, prevNow = 0, slowSum = 0, slowN = 0;
   function resize() {
     const w = deck.clientWidth || innerWidth, h = deck.clientHeight || innerHeight * 0.6;
     renderer.setSize(w, h, false);
@@ -599,6 +596,23 @@ async function initGL() {
       glow.material.opacity = day ? 0 : 0.32; glow.visible = !day;
       items.forEach(it => { it.shadow.material.opacity = day ? 0.5 : 0.75; });
     }
+    // Selbsttest: ruckelt es, erst die Auflösung senken, dann auf die 2D-Reihe wechseln
+    const raw = now - prevNow; prevNow = now;
+    if (introT > 1 && raw > 0 && raw < 250) {
+      slowSum += raw;
+      if (++slowN >= 45) {
+        const avg = slowSum / slowN; slowSum = slowN = 0;
+        if (avg > 30) {
+          if (quality > 1) { quality = 1; renderer.setPixelRatio(1); resize(); }
+          else { gl = null; tapesView.classList.remove("gl"); renderer.dispose(); layout(); return; }
+        }
+      }
+    }
+    // Steht alles still, reichen 30 Bilder pro Sekunde (nur die Spulen drehen sich)
+    const idle = pos === target && !dragging && introT > 1.2 && Math.abs(tiltTX - tiltX) < 0.003 && Math.abs(tiltTY - tiltY) < 0.003
+      && Math.abs((flipped ? Math.PI : 0) - flipAngle) < 0.003;
+    if (idle && (skip = !skip)) { carry += dt; return; }
+    dt += carry; carry = 0;
     const k = 1 - Math.exp(-dt * 6);
     tiltX += (tiltTX - tiltX) * k; tiltY += (tiltTY - tiltY) * k;
     flipAngle += ((flipped ? Math.PI : 0) - flipAngle) * (1 - Math.exp(-dt * 8));
@@ -606,7 +620,7 @@ async function initGL() {
     items.forEach((it, i) => {
       const d = i - pos, ad = Math.abs(d), sg = Math.sign(d);
       const near = Math.min(ad, 1), far = Math.max(ad - 1, 0), act = Math.max(0, 1 - ad);
-      const p = clamp((introT - Math.abs(i - Math.round(pos)) * 0.07) / 0.5, 0, 1), ip = 1 - Math.pow(1 - p, 3);
+      const p = clamp((introT - Math.abs(i - Math.round(pos)) * 0.07) / 0.4, 0, 1), ip = 1 - Math.pow(1 - p, 3);
       const g = it.group;
       g.position.set(sg * (near * 2.75 + far * 0.9) + (1 - ip) * 16, act * 0.1 + Math.sin(t * 1.4) * 0.03 * act, -near * 1.9 - far * 1.25 + act * 0.5);
       g.rotation.set(act * (0.04 + tiltY * 0.13), -sg * near * 0.95 + act * (-0.2 + tiltX * 0.24 + flipAngle * act) + (1 - ip) * 1.4, act * -0.035);
@@ -618,7 +632,7 @@ async function initGL() {
     });
     const cur = TAPES[clamp(Math.round(pos), 0, N - 1)];
     glowCol.lerp(items[TAPES.indexOf(cur)].col, 1 - Math.exp(-dt * 7));
-    glow.material.color.copy(glowCol); rim.color.copy(glowCol).lerp(new T.Color(0xffffff), 0.35);
+    glow.material.color.copy(glowCol); rim.color.copy(glowCol).lerp(WHITE, 0.35);
     renderer.render(scene, camera);
   }
   // Klick: vordere Kassette öffnet, andere kommt nach vorne
@@ -655,7 +669,7 @@ function openTapes() {
   introStart = performance.now();
   tapesView.classList.add("ready");
   layout();
-  setTimeout(() => { interactive = true; }, 300);
+  setTimeout(() => { interactive = true; }, 120);
 }
 
 // Kassette öffnen -> eigene Seite (aus data/tapes.js)
@@ -666,25 +680,27 @@ function openTape(i) {
   store.set("archiv.tape", i);
   tone(440, 0, 0.06, "square", 0.04); tone(660, 0.06, 0.08, "square", 0.04);
   tapesView.classList.add("leaving");
-  setTimeout(() => { location.href = t.page; }, 200);
+  setTimeout(() => { location.href = t.page; }, 110);
 }
 // "Zurück" im Browser (bfcache): Ansicht wieder einblenden
 addEventListener("pageshow", e => { if (e.persisted) { leaving = false; tapesView.classList.remove("leaving"); kick(); } });
 
-/* ---- Mausrad / Trackpad: frei schieben, nach kurzer Pause weich einrasten ---- */
-let wheelTimer = 0, wheelDir = 1;
+/* ---- Mausrad / Trackpad: sofort eine Kassette weiter, ohne Wartezeit ---- */
+let wheelAcc = 0, wheelLock = 0, wheelLast = 0;
 addEventListener("wheel", e => {
   if (!interactive) return;
   e.preventDefault();
+  const now = performance.now();
   let delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
   if (e.deltaMode === 1) delta *= 32; else if (e.deltaMode === 2) delta *= 400;
-  delta = clamp(delta, -120, 120);
-  target = clamp(target + delta * 0.0045, -0.3, N - 0.7);
-  wheelDir = Math.sign(delta) || wheelDir;
-  kick();
-  clearTimeout(wheelTimer);
-  // ein Dreh am Mausrad bewegt immer mindestens eine Karte
-  wheelTimer = setTimeout(() => goTo(wheelDir > 0 ? Math.ceil(target - 0.2) : Math.floor(target + 0.2)), 130);
+  if (now - wheelLast > 200) wheelAcc = 0;      // neue Geste
+  wheelLast = now;
+  if (now < wheelLock) return;                   // Nachlauf vom Trackpad ignorieren
+  wheelAcc += delta;
+  if (Math.abs(wheelAcc) >= 30) {
+    goTo(Math.round(target) + Math.sign(wheelAcc));
+    wheelAcc = 0; wheelLock = now + 160;
+  }
 }, { passive: false });
 
 /* ---- Tasten ---- */
