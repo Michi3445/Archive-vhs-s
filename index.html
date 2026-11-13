@@ -57,7 +57,7 @@ body{
 img{image-rendering:auto}
 
 /* very light film grain, the only retro hint on top of everything */
-#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:var(--grain);z-index:50}
+#grain{position:fixed;inset:0;pointer-events:none;opacity:var(--grain);z-index:50;background-size:256px 256px}
 
 /* ---------- Welcome: schwarz, kantig, kursiv, ASCII ---------- */
 #welcome{
@@ -76,7 +76,7 @@ img{image-rendering:auto}
 #welcome.gone::before,#welcome.gone .corner{opacity:0;transition:opacity .2s}
 #welcome.boot .wtext,#welcome.boot .corner{visibility:hidden}
 .wtext{position:relative;z-index:2;text-align:center;line-height:1}
-.wtext .slice{position:absolute;inset:0;will-change:transform,opacity,filter}
+.wtext .slice{position:absolute;inset:0;will-change:transform,opacity}
 .wtext .ghost{visibility:hidden}
 .w-top{
   display:block;font-family:var(--sans);font-style:italic;font-weight:500;
@@ -142,6 +142,10 @@ img{image-rendering:auto}
 .hint{font-family:var(--mono);font-style:italic;font-size:10px;color:var(--hint);letter-spacing:.12em;text-align:center}
 
 .deck{flex:1;min-height:0;position:relative;z-index:2}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:none;outline:none}
+#tapes.gl #gl{display:block}
+#tapes.gl .card{display:none}          /* die 2D-Karten sind nur der Ersatz ohne WebGL */
+#tapes.gl .aura{opacity:.55}
 .card{
   --c:#9b7bff;--w:340px;--h:214px;
   position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);margin:calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
@@ -201,7 +205,7 @@ img{image-rendering:auto}
       <button id="sound" type="button">SOUND AN</button>
     </div>
   </div>
-  <div class="deck" id="deck" role="listbox" aria-label="Kassetten"></div>
+  <div class="deck" id="deck" role="listbox" aria-label="Kassetten"><canvas id="gl"></canvas></div>
   <div class="hud bottom">
     <div class="segs" id="segs"></div>
     <div id="counter">TAPE <span id="cnum">1</span>/<span id="ctotal">5</span></div>
@@ -222,7 +226,7 @@ img{image-rendering:auto}
   <div class="skip" id="skip">KLICKEN ZUM ÜBERSPRINGEN</div>
 </div>
 
-<canvas id="grain" width="200" height="120"></canvas>
+<div id="grain"></div>
 
 <script>
 (() => {
@@ -242,13 +246,14 @@ const WEAR = [
 ];
 const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
 
-/* ================= GRAIN ================= */
-const grain = document.getElementById("grain"), gctx = grain.getContext("2d");
-const gimg = gctx.createImageData(grain.width, grain.height), gbuf = new Uint32Array(gimg.data.buffer);
-setInterval(() => {
-  for (let i = 0; i < gbuf.length; i++) { const v = (Math.random() * 255) | 0; gbuf[i] = 0xff000000 | (v << 16) | (v << 8) | v; }
-  gctx.putImageData(gimg, 0, 0);
-}, 80);
+/* ================= GRAIN (einmal erzeugt, danach statisch – keine Dauerlast) ================= */
+(() => {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"), im = g.createImageData(128, 128), d = new Uint32Array(im.data.buffer);
+  for (let i = 0; i < d.length; i++) { const v = (Math.random() * 255) | 0; d[i] = 0xff000000 | (v << 16) | (v << 8) | v; }
+  g.putImageData(im, 0, 0);
+  document.getElementById("grain").style.backgroundImage = `url(${c.toDataURL()})`;
+})();
 
 /* ================= AUDIO (unlocked by first interaction) ================= */
 let actx = null, soundOn = true;
@@ -321,10 +326,10 @@ async function dissolve() {
     const dist = (55 + Math.random() * 70) * dir;
     const delay = Math.abs(i - SLICES / 2) * 9 + Math.random() * 40;
     return s.animate([
-      { transform: "translateX(0)", opacity: 1, filter: "blur(0)" },
-      { transform: `translateX(${dir * (3 + Math.random() * 6)}px)`, opacity: 1, filter: "blur(0)", offset: 0.12 },
-      { transform: `translateX(${-dir * 4}px)`, opacity: 1, filter: "blur(0)", offset: 0.22 },
-      { transform: `translateX(${dist}vw) scaleX(1.6)`, opacity: 0, filter: "blur(6px)" },
+      { transform: "translateX(0)", opacity: 1 },
+      { transform: `translateX(${dir * (3 + Math.random() * 6)}px)`, opacity: 1, offset: 0.12 },
+      { transform: `translateX(${-dir * 4}px)`, opacity: 1, offset: 0.22 },
+      { transform: `translateX(${dist}vw) scaleX(1.6)`, opacity: 0 },
     ], { duration: 460, delay, easing: "cubic-bezier(.6,0,.3,1)", fill: "forwards" }).finished;
   });
   await wait(180);
@@ -386,6 +391,7 @@ function layout() {
   const dw = deck.clientWidth || innerWidth, dh = deck.clientHeight || innerHeight * 0.6;
   scale = clamp(Math.min(dw / 440, dh / 290), 0.6, 1.55);
   gap = Math.min(300 * scale, dw * 0.74);
+  if (gl) gl.resize();
   kick();
 }
 addEventListener("resize", layout);
@@ -397,12 +403,14 @@ let running = false, last = 0;
 function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
 const easeOut = x => 1 - Math.pow(1 - x, 3);
 function frame(now) {
+  if (leaving) { running = false; return; }      // beim Öffnen einer Kassette nichts mehr zeichnen
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   pos += (target - pos) * (1 - Math.exp(-dt * 11));
   if (Math.abs(target - pos) < 0.001) pos = target;
   const introT = introStart < 0 ? 0 : (now - introStart) / 1000;
   let introBusy = false;
-  cards.forEach((el, i) => {
+  if (gl) gl.render(now, dt, introT);
+  else cards.forEach((el, i) => {
     const d = i - pos, ad = Math.abs(d);
     const near = Math.min(ad, 1);
     const p = clamp((introT - Math.abs(i - Math.round(pos)) * 0.06) / 0.45, 0, 1);
@@ -424,9 +432,224 @@ function frame(now) {
     tapesView.style.setProperty("--cc-soft", hexA(TAPES[idx].color, 0.15));
     segs.forEach((b, j) => b.classList.toggle("on", j === idx));
     cards.forEach((el, j) => el.setAttribute("aria-selected", j === idx ? "true" : "false"));
+    flipped = false;
   }
-  if (pos !== target || introBusy || dragging) requestAnimationFrame(frame); else running = false;
+  if (gl || pos !== target || introBusy || dragging) requestAnimationFrame(frame); else running = false;
 }
+
+
+/* ================= WEBGL (Three.js): echte 3D-Kassetten =================
+   Wird nachgeladen, ohne die Seite zu blockieren. Klappt das nicht (kein Internet,
+   kein WebGL), bleibt automatisch die flache 2D-Karten-Reihe aktiv. */
+let gl = null, flipped = false, tiltTX = 0, tiltTY = 0;
+function toggleFlip() { if (!gl) return; flipped = !flipped; tone(flipped ? 520 : 780, 0, 0.06, "triangle", 0.05, flipped ? 260 : -260); }
+addEventListener("mousemove", e => { tiltTX = (e.clientX / innerWidth) * 2 - 1; tiltTY = (e.clientY / innerHeight) * 2 - 1; });
+document.addEventListener("mouseleave", () => { tiltTX = tiltTY = 0; });
+
+function loadScript(src) {
+  return new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+}
+async function initGL() {
+  if (!window.THREE) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js");
+  const T = window.THREE;
+  // Schriften für die Etiketten abwarten (höchstens 1,2 s)
+  try {
+    await Promise.race([
+      Promise.all(['64px "Permanent Marker"', 'italic 500 96px "JetBrains Mono"', 'italic 800 30px "Inter"'].map(f => document.fonts.load(f))),
+      new Promise(r => setTimeout(r, 1200)),
+    ]);
+  } catch (e) {}
+
+  const canvas = document.getElementById("gl");
+  const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputEncoding = T.sRGBEncoding;
+  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(30, 1, 0.1, 100);
+  const amb = new T.AmbientLight(0xffffff, 0.6);
+  const key = new T.DirectionalLight(0xffffff, 0.75); key.position.set(2.5, 4, 6);
+  const rim = new T.PointLight(0xffffff, 1.1, 14); rim.position.set(0, 1.2, 3.2);
+  scene.add(amb, key, rim);
+
+  const W = 3.4, H = 2.14, D = 0.42, FONT_HAND = '"Permanent Marker","Comic Sans MS",cursive',
+        FONT_MONO = '"JetBrains Mono",ui-monospace,monospace', FONT_SANS = '"Inter",system-ui,sans-serif';
+  const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return [c, c.getContext("2d")]; };
+  const tex = c => { const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = aniso; return t; };
+  // Parallelogramm = die kantige Kursiv-Form
+  const para = (g, x, y, w, h, sl) => { g.beginPath(); g.moveTo(x + sl, y); g.lineTo(x + w, y); g.lineTo(x + w - sl, y + h); g.lineTo(x, y + h); g.closePath(); };
+  const fit = (g, txt, maxW, size, font) => { do { g.font = font.replace("%", size); size -= 2; } while (g.measureText(txt).width > maxW && size > 14); };
+  const paper = (g, x, y, h) => { const p = g.createLinearGradient(0, y, 0, y + h); p.addColorStop(0, "#f4ecd8"); p.addColorStop(1, "#e2d5b6"); return p; };
+
+  function frontTex(t, w) {
+    const [c, g] = mk(1024, 644);
+    const bg = g.createLinearGradient(0, 0, 1024, 644); bg.addColorStop(0, "#292833"); bg.addColorStop(.55, "#191820"); bg.addColorStop(1, "#111017");
+    g.fillStyle = bg; g.fillRect(0, 0, 1024, 644);
+    g.fillStyle = t.color; g.fillRect(0, 0, 30, 644);
+    g.fillStyle = "rgba(255,255,255,.10)"; g.fillRect(30, 0, 994, 3);
+    g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(30, 640, 994, 4);
+    // Nummer
+    g.fillStyle = t.color; g.textBaseline = "alphabetic";
+    g.font = `italic 500 104px ${FONT_MONO}`; g.fillText(t.num, 62, 158);
+    // Etikett (leicht schief, vergilbt)
+    g.save(); g.translate(612, 116); g.rotate(w.rot * 0.6 * Math.PI / 180); g.translate(-612, -116);
+    para(g, 232, 50, 760, 132, 30); g.fillStyle = paper(g, 0, 50, 132); g.fill();
+    g.fillStyle = "#1d1a24";
+    fit(g, t.title, 640, t.subject ? 66 : 76, `% ${FONT_HAND}`);
+    g.fillText(t.title, 286, t.subject ? 122 : 142);
+    if (t.subject) { g.fillStyle = "#5d5547"; fit(g, t.subject, 640, 26, `italic % ${FONT_MONO}`); g.fillText(t.subject, 288, 162); }
+    g.restore();
+    // Fenster
+    para(g, 62, 222, 920, 262, 38); g.fillStyle = "#07070a"; g.fill();
+    g.strokeStyle = "rgba(255,255,255,.09)"; g.lineWidth = 2; g.stroke();
+    // Fuß
+    g.fillStyle = "#77748a"; g.font = `italic 22px ${FONT_MONO}`;
+    if ("letterSpacing" in g) g.letterSpacing = "4px";
+    g.fillText("ARCHIV · VHS · E-180", 64, 586);
+    para(g, 668, 524, 314, 84, 28); g.fillStyle = t.color; g.fill();
+    g.fillStyle = "#0b0a10"; g.font = `italic 800 32px ${FONT_SANS}`; g.textAlign = "center";
+    g.fillText("ÖFFNEN ▶", 825, 578);
+    return tex(c);
+  }
+  function topTex(t) {
+    const [c, g] = mk(1024, 128);
+    g.fillStyle = "#2b2a35"; g.fillRect(0, 0, 1024, 128);
+    para(g, 60, 22, 904, 84, 22); g.fillStyle = paper(g, 0, 22, 84); g.fill();
+    g.fillStyle = "#1d1a24"; fit(g, t.title, 600, 54, `% ${FONT_HAND}`); g.textBaseline = "middle"; g.fillText(t.title, 110, 66);
+    g.fillStyle = t.color; g.font = `italic 500 52px ${FONT_MONO}`; g.textAlign = "right"; g.fillText(t.num, 920, 68);
+    return tex(c);
+  }
+  function backTex(t) {
+    const [c, g] = mk(1024, 644);
+    g.fillStyle = "#14131a"; g.fillRect(0, 0, 1024, 644);
+    para(g, 60, 60, 904, 524, 60); g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 3; g.stroke();
+    if ("letterSpacing" in g) g.letterSpacing = "6px";
+    g.font = `italic 34px ${FONT_MONO}`; g.fillStyle = "#66637a"; g.fillText("ARCHIV", 150, 190);
+    g.fillStyle = t.color; g.fillText(t.title, 150, 260);
+    g.fillStyle = "#66637a"; g.fillText(`NR. ${t.num} / ${String(N).padStart(2, "0")}`, 150, 330);
+    g.fillText(t.subject || "SP · 180 MIN", 150, 400);
+    return tex(c);
+  }
+  const reelTex = (() => {
+    const [c, g] = mk(256, 256);
+    g.translate(128, 128);
+    g.fillStyle = "#2c2b36"; g.beginPath(); g.arc(0, 0, 124, 0, 7); g.fill();
+    g.fillStyle = "rgba(255,255,255,.82)";
+    for (let k = 0; k < 6; k++) { g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 112, k * Math.PI / 3, k * Math.PI / 3 + 0.25); g.closePath(); g.fill(); }
+    g.fillStyle = "#07070a"; g.beginPath(); g.arc(0, 0, 26, 0, 7); g.fill();
+    return tex(c);
+  })();
+  const radial = (inner, outer) => {
+    const [c, g] = mk(256, 256); const r = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    r.addColorStop(0, inner); r.addColorStop(1, outer); g.fillStyle = r; g.fillRect(0, 0, 256, 256); return new T.CanvasTexture(c);
+  };
+
+  const box = new T.BoxGeometry(W, H, D), reelGeo = new T.CircleGeometry(0.335, 40), shadowGeo = new T.PlaneGeometry(W * 1.25, 1.5);
+  const shadowTex = radial("rgba(0,0,0,.75)", "rgba(0,0,0,0)");
+  const items = TAPES.map((t, i) => {
+    const col = new T.Color(t.color);
+    const std = o => new T.MeshStandardMaterial(Object.assign({ roughness: 0.62, metalness: 0.08 }, o));
+    // BoxGeometry: +x, -x, +y, -y, +z, -z
+    const mats = [std({ color: 0x1a1921 }), std({ color: col }), std({ map: topTex(t) }), std({ color: 0x0d0c12 }),
+                  std({ map: frontTex(t, WEAR[i % WEAR.length]), roughness: 0.75 }), std({ map: backTex(t) })];
+    const base = mats.map(m => m.color.clone());
+    const group = new T.Group(), mesh = new T.Mesh(box, mats);
+    mesh.userData.index = i;
+    const reels = [-0.76, 0.76].map(x => {
+      const r = new T.Mesh(reelGeo, new T.MeshBasicMaterial({ map: reelTex, transparent: true }));
+      r.position.set(x - 0.02, -0.105, D / 2 + 0.004); return r;
+    });
+    group.add(mesh, ...reels);
+    const shadow = new T.Mesh(shadowGeo, new T.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = -H / 2 - 0.42;
+    scene.add(group, shadow);
+    return { group, mesh, mats, base, reels, shadow, col };
+  });
+  // Kommen die Schriften erst später an, die Etiketten einmal neu zeichnen
+  if (!document.fonts.check('64px "Permanent Marker"')) {
+    document.fonts.ready.then(() => items.forEach((it, i) => {
+      it.mats[4].map = frontTex(TAPES[i], WEAR[i % WEAR.length]); it.mats[2].map = topTex(TAPES[i]); it.mats[5].map = backTex(TAPES[i]);
+    }));
+  }
+  // Leuchten hinter der aktiven Kassette
+  const glow = new T.Mesh(new T.PlaneGeometry(6.4, 4.4),
+    new T.MeshBasicMaterial({ map: radial("rgba(255,255,255,.9)", "rgba(255,255,255,0)"), transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+  glow.position.set(0, 0.1, -1.1); scene.add(glow);
+
+  let dist = 9, unit = 300, tiltX = 0, tiltY = 0, flipAngle = 0, theme = "";
+  const glowCol = new T.Color(TAPES[0].color);
+  function resize() {
+    const w = deck.clientWidth || innerWidth, h = deck.clientHeight || innerHeight * 0.6;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    const tanH = Math.tan(T.MathUtils.degToRad(camera.fov / 2));
+    const frac = camera.aspect > 1.15 ? 0.38 : 0.8;
+    dist = Math.max(W / (frac * 2 * tanH * camera.aspect), H / (0.56 * 2 * tanH)) + 0.5;
+    camera.position.set(0, dist * 0.2, dist);
+    camera.lookAt(0, -0.12, 0);
+    camera.updateProjectionMatrix();
+    unit = (2.75 / (2 * tanH * dist)) * h;      // Pixel pro Kassetten-Abstand, fürs Ziehen
+  }
+  function render(now, dt, introT) {
+    const th = document.documentElement.getAttribute("data-theme") || "night";
+    if (th !== theme) {
+      theme = th;
+      const day = th === "day";
+      amb.intensity = day ? 0.8 : 0.5; key.intensity = day ? 0.5 : 0.55; rim.intensity = day ? 0.25 : 0.8;
+      glow.material.opacity = day ? 0 : 0.32; glow.visible = !day;
+      items.forEach(it => { it.shadow.material.opacity = day ? 0.5 : 0.75; });
+    }
+    const k = 1 - Math.exp(-dt * 6);
+    tiltX += (tiltTX - tiltX) * k; tiltY += (tiltTY - tiltY) * k;
+    flipAngle += ((flipped ? Math.PI : 0) - flipAngle) * (1 - Math.exp(-dt * 8));
+    const t = now / 1000;
+    items.forEach((it, i) => {
+      const d = i - pos, ad = Math.abs(d), sg = Math.sign(d);
+      const near = Math.min(ad, 1), far = Math.max(ad - 1, 0), act = Math.max(0, 1 - ad);
+      const p = clamp((introT - Math.abs(i - Math.round(pos)) * 0.07) / 0.5, 0, 1), ip = 1 - Math.pow(1 - p, 3);
+      const g = it.group;
+      g.position.set(sg * (near * 2.75 + far * 0.9) + (1 - ip) * 16, act * 0.1 + Math.sin(t * 1.4) * 0.03 * act, -near * 1.9 - far * 1.25 + act * 0.5);
+      g.rotation.set(act * (0.04 + tiltY * 0.13), -sg * near * 0.95 + act * (-0.2 + tiltX * 0.24 + flipAngle * act) + (1 - ip) * 1.4, act * -0.035);
+      const dim = Math.max(0.16, 1 - near * 0.52 - far * 0.14);
+      it.mats.forEach((m, j) => m.color.copy(it.base[j]).multiplyScalar(dim));
+      it.reels.forEach(r => { r.material.color.setScalar(dim); if (act > 0.5) r.rotation.z -= dt * 2.6; });
+      it.shadow.position.x = g.position.x; it.shadow.position.z = g.position.z;
+      it.shadow.scale.setScalar(0.8 + act * 0.2);
+    });
+    const cur = TAPES[clamp(Math.round(pos), 0, N - 1)];
+    glowCol.lerp(items[TAPES.indexOf(cur)].col, 1 - Math.exp(-dt * 7));
+    glow.material.color.copy(glowCol); rim.color.copy(glowCol).lerp(new T.Color(0xffffff), 0.35);
+    renderer.render(scene, camera);
+  }
+  // Klick: vordere Kassette öffnet, andere kommt nach vorne
+  const ray = new T.Raycaster(), ptr = new T.Vector2();
+  function pick(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObjects(items.map(it => it.mesh))[0];
+    return hit ? hit.object.userData.index : -1;
+  }
+  canvas.addEventListener("click", e => {
+    if (!interactive || dragMoved) return;
+    const i = pick(e);
+    if (i < 0) return;
+    if (i === current && Math.abs(pos - i) < 0.3) openTape(i); else goTo(i);
+  });
+  let lastPick = 0;
+  canvas.addEventListener("mousemove", e => {
+    const n = performance.now(); if (n - lastPick < 60) return; lastPick = n;
+    canvas.style.cursor = pick(e) >= 0 ? "pointer" : "";
+  });
+  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); gl = null; tapesView.classList.remove("gl"); layout(); });
+
+  resize();
+  render(performance.now(), 0, introStart < 0 ? 0 : (performance.now() - introStart) / 1000);   // einmal vorab: lädt Texturen auf die Grafikkarte
+  gl = { render, resize, dragUnit: () => unit };
+  tapesView.classList.add("gl");
+  kick();
+}
+initGL().catch(() => { /* kein WebGL / kein Netz: 2D-Karten bleiben */ });
 
 function openTapes() {
   introStart = performance.now();
@@ -446,7 +669,7 @@ function openTape(i) {
   setTimeout(() => { location.href = t.page; }, 200);
 }
 // "Zurück" im Browser (bfcache): Ansicht wieder einblenden
-addEventListener("pageshow", e => { if (e.persisted) { leaving = false; tapesView.classList.remove("leaving"); } });
+addEventListener("pageshow", e => { if (e.persisted) { leaving = false; tapesView.classList.remove("leaving"); kick(); } });
 
 /* ---- Mausrad / Trackpad: frei schieben, nach kurzer Pause weich einrasten ---- */
 let wheelTimer = 0, wheelDir = 1;
@@ -469,6 +692,7 @@ addEventListener("keydown", e => {
   if (!interactive) return;
   const k = e.key;
   if (k >= "1" && k <= String(Math.min(9, N))) { goTo(+k - 1); return; }
+  if (k === "f" || k === "F") { toggleFlip(); return; }
   if (k === "Enter" || k === " ") { e.preventDefault(); openTape(clamp(Math.round(target), 0, N - 1)); }
   else if (k === "ArrowRight" || k === "ArrowDown") { e.preventDefault(); goTo(Math.round(target) + 1); }
   else if (k === "ArrowLeft" || k === "ArrowUp") { e.preventDefault(); goTo(Math.round(target) - 1); }
@@ -488,7 +712,7 @@ addEventListener("pointermove", e => {
   const dx = e.clientX - sx;
   if (!dragMoved && Math.abs(dx) < 8) return;
   dragMoved = true;
-  target = clamp(sTarget - dx / gap, -0.3, N - 0.7);
+  target = clamp(sTarget - dx / (gl ? gl.dragUnit() : gap), -0.3, N - 0.7);
   const now = performance.now();
   vel = (e.clientX - lastX) / Math.max(1, now - lastT); lastX = e.clientX; lastT = now;
   kick();

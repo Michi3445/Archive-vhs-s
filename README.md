@@ -2,14 +2,14 @@
 
 **▶ Live ansehen: [michi3445.github.io/Archive-vhs-s](https://michi3445.github.io/Archive-vhs-s/)**
 
-Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten als schräge, kantige Karten in einer Reihe, durch die man seitlich scrollen, wischen und klicken kann. Davor läuft ein kurzer Startscreen mit ASCII-Schriftzug.
+Ein kleines Video-Archiv im Browser: fünf VHS-Kassetten in echtem 3D (WebGL) in einer Reihe, durch die man seitlich scrollen, wischen und klicken kann. Davor läuft ein kurzer Startscreen mit ASCII-Schriftzug.
 
-Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist reines HTML, CSS und JavaScript, ohne Build-Schritt und ohne Bibliotheken.
+Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist reines HTML, CSS und JavaScript ohne Build-Schritt. Für die 3D-Kassetten wird Three.js von einem CDN nachgeladen.
 
 ## Ablauf
 
 1. **Startscreen:** Schwarzer Bildschirm mit kantigem, kursivem ASCII-Schriftzug „ARCHIV“ und „Made by Michi“. Nach einem kurzen Moment **verzischt** alles zu beiden Seiten. Der Start läuft bei jedem Laden und dauert insgesamt höchstens 2 Sekunden.
-2. Die **Kassetten-Karten fliegen von rechts herein**. Die mittlere ist groß und leuchtet, die anderen sind kleiner und blasser.
+2. Die **Kassetten fliegen von rechts herein**. Die mittlere steht vorne und leuchtet, die anderen drehen sich zur Seite und werden dunkler.
 3. **Kassette öffnen** führt zu ihrer eigenen Seite mit einem **Lernkarten-Trainer**.
 
 ## Steuerung
@@ -19,10 +19,12 @@ Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist rei
 | Nächste / vorige Kassette | Mausrad, Pfeiltasten, Ziehen | Seitlich wischen |
 | Direkt zu Kassette springen | Tasten `1`–`5`, Balken unten oder Klick auf eine Karte | Balken oder Karte antippen |
 | Kassette öffnen | Klick auf die mittlere Karte oder `Enter` | Mittlere Karte antippen |
+| Kassette umdrehen | Taste `F` | – |
+| Kassette neigen | Maus bewegen | – |
 | Tag / Nacht | Knopf oben rechts (AUTO → TAG → NACHT) | genauso |
 | Ton an / aus | Knopf oben rechts | Knopf oben rechts |
 
-Die Reihe rastet nach dem Scrollen weich auf der nächsten Karte ein.
+Die Reihe rastet nach dem Scrollen weich auf der nächsten Kassette ein.
 
 **Auf einer Kassetten-Seite:** Karte antippen oder `Leertaste` deckt die Antwort auf. Dann „✓ Gewusst“ (`→`) oder „✗ Nochmal“ (`←`). Falsche Karten kommen am Ende noch einmal dran. `Esc` führt zurück zum Archiv.
 
@@ -38,7 +40,7 @@ Die Reihe rastet nach dem Scrollen weich auf der nächsten Karte ein.
 - Abgenutzte Etiketten: handgeschriebene Titel, vergilbtes Papier und Klebeband-Reste, bei jeder Kassette etwas anders.
 - Die zuletzt angesehene Kassette wird gemerkt (`localStorage`).
 - Ein kurzer Piepton beim Wechseln, erzeugt mit der Web Audio API. Er spielt erst nach dem ersten Klick, weil Browser vorher keinen Ton erlauben.
-- Alles ist schlank gehalten: keine Bibliotheken, kein Build-Schritt.
+- Schlank gehalten: kein Build-Schritt, kein Dauer-Rauschen, Three.js wird im Hintergrund nachgeladen und blockiert den Start nicht.
 
 ## Starten
 
@@ -89,7 +91,7 @@ window.CARDS = [
 ## Aufbau
 
 ```
-index.html          Startseite: Startscreen + Karten-Reihe
+index.html          Startseite: Startscreen + 3D-Kassetten-Reihe
 data/tapes.js       Liste aller Kassetten (Titel, Fach, Farbe, Seite)
 assets/theme.js     Tag/Nacht-Umschaltung (für alle Seiten)
 tapes/tape-01.html  Seite pro Kassette, mit den Lernkarten
@@ -99,7 +101,8 @@ tapes/trainer.js    Lernkarten-Trainer (für alle Kassetten gleich)
 
 ## Technik
 
-- Karten-Reihe nur mit 2D-CSS-Transforms, die Animation läuft nur, solange sich etwas bewegt
+- 3D-Kassetten mit WebGL über [Three.js](https://threejs.org/) (r128, von cdnjs). Etiketten werden per Canvas als Texturen gezeichnet.
+- Ersatz ohne WebGL oder ohne Internet: eine flache 2D-Karten-Reihe mit denselben Funktionen
 - Schriften von Google Fonts: Inter, JetBrains Mono, VT323, Permanent Marker. Ohne Internet greift eine Systemschrift.
 - Getestet in Chromium auf Desktop und im iPhone-Format
 
