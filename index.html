@@ -6,7 +6,9 @@
 <title>ARCHIV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&family=VT323&family=Permanent+Marker&display=swap" rel="stylesheet">
+<script src="assets/theme.js"></script>
+<script src="data/tapes.js"></script>
 <style>
 :root{
   --bg:#09090d;
@@ -19,7 +21,31 @@
   --lila:#9b7bff;
   --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --hand:"Permanent Marker","Comic Sans MS","Segoe Print",cursive;
+  --room:var(--bg);
+  --chip:rgba(255,255,255,.04);
+  --track:rgba(255,255,255,.12);
+  --hint:#4a4858;
+  --glow-size:60px;
+  --tape-shadow:0 0 0 transparent;
+  --grain:.035;
 }
+/* TAG: helles Wohnzimmer – Wand oben, Holzboden unten */
+html[data-theme="day"]{
+  --bg:#e8dfd1;
+  --text:#2a2530;
+  --muted:#7c7064;
+  --line:rgba(60,40,20,.14);
+  --room:linear-gradient(180deg,#f1e9dd 0%,#e8dfd1 58%,#cdb99c 58.2%,#bba584 100%);
+  --chip:rgba(0,0,0,.05);
+  --track:rgba(0,0,0,.14);
+  --hint:#9a8d7f;
+  --glow-size:26px;
+  --tape-shadow:0 26px 40px -10px rgba(60,40,20,.45);
+  --grain:.02;
+}
+html[data-theme="day"] .aura{background:radial-gradient(closest-side,rgba(255,236,190,.75),transparent)!important}
+html,body{transition:background .4s}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);overflow:hidden}
 body{
@@ -31,7 +57,7 @@ body{
 img{image-rendering:auto}
 
 /* very light film grain, the only retro hint on top of everything */
-#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.035;z-index:50}
+#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:var(--grain);z-index:50}
 
 /* ---------- Welcome ---------- */
 #welcome{
@@ -96,7 +122,8 @@ img{image-rendering:auto}
 .skip{position:absolute;z-index:2;bottom:max(22px,6vh);font-size:clamp(18px,2.4vw,24px);color:rgba(255,255,255,.75);letter-spacing:.1em;animation:cur 1.2s steps(1) infinite}
 
 /* ---------- Tape view ---------- */
-#tapes{position:fixed;inset:0;touch-action:none}
+#tapes{position:fixed;inset:0;touch-action:none;background:var(--room);transition:opacity .25s ease,transform .25s ease}
+#tapes.leaving{opacity:0;transform:scale(1.04)}
 .scene{position:absolute;inset:0;overflow:hidden;perspective:1100px;perspective-origin:50% 22%}
 .aura{
   position:absolute;left:50%;top:48%;width:min(90vw,900px);height:min(60vh,520px);transform:translate(-50%,-50%);
@@ -117,7 +144,7 @@ img{image-rendering:auto}
   width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:4px;
   background:linear-gradient(160deg,#22212b 0%,#16151c 55%,#121118 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.04),
-             0 0 calc(var(--glow) * 60px) calc(var(--glow) * 2px) var(--c-glow);
+             0 0 calc(var(--glow) * var(--glow-size)) calc(var(--glow) * 2px) var(--c-glow),var(--tape-shadow);
 }
 .f-back{width:var(--w);height:var(--h);transform:rotateY(180deg) translateZ(calc(var(--d) / 2));background:#121118;border-radius:4px}
 .f-right,.f-left{width:var(--d);height:var(--h);left:calc((var(--w) - var(--d)) / 2);background:linear-gradient(90deg,#141319,#1c1b23 50%,#141319)}
@@ -128,13 +155,29 @@ img{image-rendering:auto}
 .f-bottom{transform:rotateX(-90deg) translateZ(calc(var(--h) / 2));background:#0e0d13}
 
 .label{
-  position:absolute;left:14px;right:14px;top:12px;height:62px;border-radius:3px;
-  background:#f3f1f7;color:#16151c;display:flex;align-items:center;padding:0 14px 0 18px;gap:12px;overflow:hidden;
+  position:absolute;left:14px;right:14px;top:12px;height:62px;border-radius:2px;
+  background:linear-gradient(170deg,#f4ecd8,#ebe0c6 70%,#e2d4b4);color:#1d1a24;
+  display:flex;align-items:center;padding:0 14px 0 18px;gap:12px;
+  transform:rotate(var(--rot,0deg));
+  box-shadow:0 1px 0 rgba(0,0,0,.25);
 }
-.label::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
-.label .txt{flex:1;min-width:0}
-.label .k{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#8c899a}
-.label .t{font-size:17px;font-weight:800;letter-spacing:.02em;margin-top:5px;white-space:nowrap}
+.label::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c);opacity:.85}
+/* abgenutzte Kante + Kaffeefleck (Ring) */
+.label::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at var(--sx,80%) var(--sy,30%),transparent 15px,rgba(120,72,30,var(--stain,0)) 16px,rgba(120,72,30,calc(var(--stain,0) * .35)) 19px,transparent 21px),
+    radial-gradient(circle at var(--sx,80%) var(--sy,30%),rgba(120,72,30,calc(var(--stain,0) * .25)) 0 15px,transparent 16px),
+    linear-gradient(90deg,rgba(90,60,20,.08),transparent 8%,transparent 92%,rgba(90,60,20,.1));
+}
+.label .tp{position:absolute;width:34px;height:12px;background:rgba(236,228,200,.75);box-shadow:0 0 0 1px rgba(0,0,0,.04);display:none}
+.label .tp.on{display:block}
+.label .tp1{left:-10px;top:-5px;transform:rotate(-32deg)}
+.label .tp2{right:-12px;bottom:-4px;transform:rotate(-28deg)}
+.label .txt{flex:1;min-width:0;position:relative}
+.label .k{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#9a8e74}
+.label .t{font-family:var(--hand);font-size:21px;line-height:1.05;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1d1a24}
+.label .sub{font-family:var(--hand);font-size:11px;color:#5d5547;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .label .n{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--c);letter-spacing:-.02em}
 .window{
   position:absolute;left:62px;right:62px;bottom:18px;height:54px;border-radius:4px;
@@ -152,7 +195,7 @@ img{image-rendering:auto}
 .tape.active .reel{animation:spin 2.4s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .brand{position:absolute;left:16px;bottom:22px;font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#4a4858;writing-mode:vertical-rl;transform:rotate(180deg)}
-.spine{position:absolute;inset:8px 12px;border-radius:2px;background:#f3f1f7;color:#16151c;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;font-size:11px;font-weight:700;overflow:hidden}
+.spine{position:absolute;inset:8px 12px;border-radius:2px;background:#efe5cd;color:#1d1a24;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;font-family:var(--hand);font-size:13px;overflow:hidden}
 .spine::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
 .spine b{font-family:var(--mono);font-weight:500;color:var(--c)}
 .back-txt{position:absolute;inset:18px;font-family:var(--mono);font-size:9px;line-height:2;color:#55536a;letter-spacing:.1em}
@@ -166,9 +209,10 @@ img{image-rendering:auto}
 .hud.bottom{bottom:max(26px,env(safe-area-inset-bottom));flex-direction:column;gap:14px}
 .logo{font-weight:800;font-size:15px;letter-spacing:.24em}
 .logo i{font-style:normal;color:var(--cc,var(--lila));transition:color .4s}
-#sound{
+.hud-right{display:flex;gap:8px}
+#sound,.chip{
   pointer-events:auto;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text);
-  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;
+  background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;
   display:flex;align-items:center;gap:8px;
 }
 #sound::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
@@ -177,13 +221,15 @@ img{image-rendering:auto}
 .bars{display:flex;gap:6px}
 .bars{pointer-events:auto}
 .bars button{appearance:none;border:0;background:none;padding:12px 0;cursor:pointer;display:block}
-.bars button i{display:block;width:28px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);transition:background .3s,width .3s}
-.bars button:hover i{background:rgba(255,255,255,.35)}
+.bars button i{display:block;width:28px;height:3px;border-radius:2px;background:var(--track);transition:background .3s,width .3s}
+.bars button:hover i{background:var(--muted)}
 .bars button.on i{width:44px;background:var(--cc,var(--lila))}
 .bars button:focus-visible{outline:1px solid var(--muted);outline-offset:2px}
 #counter{font-family:var(--mono);font-size:13px;letter-spacing:.18em;color:var(--muted)}
 #counter span{color:var(--text)}
-.hint{font-family:var(--mono);font-size:10px;color:#4a4858;letter-spacing:.12em;text-align:center;padding:0 16px}
+#open{pointer-events:auto;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--text);background:var(--chip);border:1px solid var(--cc,var(--lila));border-radius:999px;padding:9px 18px;cursor:pointer;transition:border-color .3s}
+#open:hover{background:var(--cc,var(--lila));color:#fff}
+.hint{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:.12em;text-align:center;padding:0 16px}
 </style>
 </head>
 <body>
@@ -195,12 +241,16 @@ img{image-rendering:auto}
   </div>
   <div class="hud top">
     <span class="logo">ARCH<i>I</i>V</span>
-    <button id="sound" type="button">SOUND AN</button>
+    <div class="hud-right">
+      <button class="chip" type="button" data-theme-btn>☾ AUTO</button>
+      <button id="sound" type="button">SOUND AN</button>
+    </div>
   </div>
   <div class="hud bottom">
     <div class="bars" id="bars"></div>
-    <div id="counter">TAPE <span id="cnum">1</span>/5</div>
-    <div class="hint" id="hint">← → · 1–5 · DOPPELKLICK ZUM UMDREHEN</div>
+    <div id="counter">TAPE <span id="cnum">1</span>/<span id="ctotal">5</span></div>
+    <button id="open" type="button">KASSETTE ÖFFNEN ▶</button>
+    <div class="hint" id="hint">← → BLÄTTERN · ENTER ÖFFNEN · F UMDREHEN</div>
   </div>
 </section>
 
@@ -225,12 +275,16 @@ img{image-rendering:auto}
 "use strict";
 
 /* ================= DATA ================= */
-const TAPES = [
-  { title: "TAPE 01", num: "01", color: "#ff4fd8" },
-  { title: "TAPE 02", num: "02", color: "#3ee6f0" },
-  { title: "TAPE 03", num: "03", color: "#9b7bff" },
-  { title: "TAPE 04", num: "04", color: "#ff7ab8" },
-  { title: "TAPE 05", num: "05", color: "#6c9bff" },
+// Kassetten kommen aus data/tapes.js (dort bearbeiten)
+const TAPES = (window.ARCHIV_TAPES || []).map(t => Object.assign({ subject: "", color: "#9b7bff", page: "" }, t, { num: t.id }));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// Abnutzung der Etiketten: pro Kassette fest, damit es bei jedem Laden gleich aussieht
+const WEAR = [
+  { rot: -1.4, sx: "78%", sy: "28%", stain: .55, tp: [1, 0] },
+  { rot: 0.9,  sx: "24%", sy: "70%", stain: 0,   tp: [0, 1] },
+  { rot: -0.6, sx: "62%", sy: "85%", stain: .4,  tp: [1, 1] },
+  { rot: 1.5,  sx: "88%", sy: "60%", stain: .7,  tp: [0, 0] },
+  { rot: -1.0, sx: "40%", sy: "20%", stain: 0,   tp: [1, 0] },
 ];
 const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
 
@@ -275,7 +329,7 @@ const streak = document.getElementById("streak");
 const skip = document.getElementById("skip");
 const isTouch = matchMedia("(pointer: coarse)").matches;
 skip.textContent = isTouch ? "TIPPEN ZUM ÜBERSPRINGEN" : "KLICKEN ZUM ÜBERSPRINGEN";
-document.getElementById("hint").textContent = isTouch ? "WISCHEN · LANG DRÜCKEN ZUM UMDREHEN" : "← → · 1–5 · DOPPELKLICK ZUM UMDREHEN";
+document.getElementById("hint").textContent = isTouch ? "WISCHEN · TIPPEN ÖFFNET · HALTEN DREHT" : "← → BLÄTTERN · ENTER ÖFFNEN · F UMDREHEN";
 
 const SLICES = 18;
 const slices = [];
@@ -334,7 +388,17 @@ async function dissolve() {
   clearInterval(tcTimer);
   welcome.remove();
 }
-setTimeout(dissolve, 450 + 900 + 2000);   // insert, title in, then 2 seconds hold
+// schnell: den Startscreen nur einmal pro Browser-Sitzung zeigen (z. B. nicht nach "Zurück" von einer Kassette)
+let seenWelcome = false;
+try { seenWelcome = sessionStorage.getItem("archiv.welcome") === "1"; sessionStorage.setItem("archiv.welcome", "1"); } catch (e) {}
+if (seenWelcome) {
+  welcomeDone = true;
+  clearInterval(tcTimer);
+  welcome.remove();
+  setTimeout(() => { introStart = performance.now() - 10000; tapesView.classList.add("ready"); interactive = true; }, 0);
+} else {
+  setTimeout(dissolve, 450 + 900 + 2000);   // insert, title in, then 2 seconds hold
+}
 welcome.addEventListener("click", () => { initAudio(); dissolve(); });
 addEventListener("keydown", e => { if (!welcomeDone && (e.key === "Enter" || e.key === " ")) dissolve(); });
 
@@ -344,23 +408,30 @@ const stage = document.getElementById("stage");
 const barsEl = document.getElementById("bars");
 const cnum = document.getElementById("cnum");
 const tapeEls = TAPES.map((t, i) => {
+  const w = WEAR[i % WEAR.length];
   const el = document.createElement("div");
   el.className = "tape";
   el.style.setProperty("--c", t.color);
   el.style.setProperty("--c-glow", hexA(t.color, 0.45));
   el.innerHTML = `
     <div class="face f-front">
-      <div class="label"><div class="txt"><div class="k">ARCHIV · VHS</div><div class="t">${t.title}</div></div><div class="n">${t.num}</div></div>
+      <div class="label" style="--rot:${w.rot}deg;--sx:${w.sx};--sy:${w.sy};--stain:${w.stain}">
+        <i class="tp tp1${w.tp[0] ? " on" : ""}"></i><i class="tp tp2${w.tp[1] ? " on" : ""}"></i>
+        <div class="txt"><div class="k">ARCHIV · VHS</div><div class="t">${esc(t.title)}</div>${t.subject ? `<div class="sub">${esc(t.subject)}</div>` : ""}</div><div class="n">${esc(t.num)}</div>
+      </div>
       <div class="window"><div class="reel"></div><div class="reel"></div></div>
       <div class="brand">E-180</div>
     </div>
-    <div class="face f-back"><div class="back-txt">ARCHIV<br><em>${t.title}</em><br>NR. ${t.num} / 05<br>SP · 180 MIN</div></div>
+    <div class="face f-back"><div class="back-txt">ARCHIV<br><em>${esc(t.title)}</em><br>NR. ${esc(t.num)} / ${String(TAPES.length).padStart(2, "0")}<br>${t.subject ? esc(t.subject) : "SP · 180 MIN"}</div></div>
     <div class="face f-right"></div>
     <div class="face f-left"></div>
-    <div class="face f-top"><div class="spine"><span>${t.title}</span><b>${t.num}</b></div></div>
+    <div class="face f-top"><div class="spine"><span>${esc(t.title)}</span><b>${esc(t.num)}</b></div></div>
     <div class="face f-bottom"></div>`;
-  el.addEventListener("click", () => { if (!dragMoved && !longPressed) goTo(i); });
-  el.addEventListener("dblclick", e => { e.preventDefault(); if (i === current) toggleFlip(); });
+  // Klick auf die vordere Kassette öffnet sie, Klick auf eine andere holt sie nach vorne
+  el.addEventListener("click", () => {
+    if (dragMoved || longPressed || !interactive) return;
+    if (i === current && Math.abs(pos - i) < 0.3) openTape(i); else goTo(i);
+  });
   stage.appendChild(el);
   const bar = document.createElement("button");
   bar.type = "button"; bar.setAttribute("aria-label", t.title); bar.innerHTML = "<i></i>";
@@ -412,6 +483,21 @@ function openTapes() {
   setTimeout(() => { tapesView.classList.add("ready"); interactive = true; }, 700);
 }
 function goTo(i) { target = clamp(Math.round(i), 0, N - 1); }
+// Kassette öffnen -> eigene Seite (aus data/tapes.js)
+let leaving = false;
+function openTape(i) {
+  const t = TAPES[i];
+  if (!t || !t.page || leaving) return;
+  leaving = true;
+  store.set("archiv.tape", i);
+  tone(440, 0, 0.06, "square", 0.04); tone(660, 0.06, 0.08, "square", 0.04);
+  tapesView.classList.add("leaving");
+  setTimeout(() => { location.href = t.page; }, 220);
+}
+document.getElementById("open").addEventListener("click", e => { e.stopPropagation(); if (interactive) openTape(current); });
+// "Zurück" im Browser (bfcache): Ansicht wieder einblenden
+addEventListener("pageshow", e => { if (e.persisted) { leaving = false; tapesView.classList.remove("leaving"); } });
+document.getElementById("ctotal").textContent = N;
 addEventListener("contextmenu", e => { if (interactive) e.preventDefault(); });
 
 let last = performance.now();
@@ -477,6 +563,7 @@ addEventListener("keydown", e => {
   const k = e.key;
   if (k >= "1" && k <= String(N)) { goTo(+k - 1); return; }
   if (k === "f" || k === "F") { toggleFlip(); return; }
+  if (k === "Enter" || k === " ") { e.preventDefault(); openTape(current); return; }
   if (k === "ArrowRight" || k === "ArrowDown") { e.preventDefault(); goTo(Math.round(target) + 1); }
   else if (k === "ArrowLeft" || k === "ArrowUp") { e.preventDefault(); goTo(Math.round(target) - 1); }
   else if (k === "Home") goTo(0);

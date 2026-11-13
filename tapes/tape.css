@@ -1,0 +1,68 @@
+/* ARCHIV – gemeinsames Design für alle Kassetten-Seiten (schlank, ohne Effekte) */
+:root{
+  --bg:#09090d;--card:#14131b;--card2:#1b1a24;--text:#eceaf2;--muted:#8a8799;
+  --line:rgba(255,255,255,.09);--c:#9b7bff;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --hand:"Permanent Marker","Comic Sans MS","Segoe Print",cursive;
+  --ok:#3ecf8e;--bad:#ff5d73;
+}
+html[data-theme="day"]{
+  --bg:#efe7db;--card:#fbf7f0;--card2:#f3ebdf;--text:#2a2530;--muted:#7c7064;--line:rgba(60,40,20,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:var(--sans);color:var(--text);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px max(16px,4vw);max-width:860px;margin:0 auto}
+.back{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:999px}
+.back:hover{border-color:var(--c)}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.08em;background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:8px max(16px,4vw) 64px}
+
+.hero{display:flex;align-items:center;gap:18px;margin:12px 0 28px}
+.sticker{
+  flex:none;width:76px;height:76px;border-radius:4px;display:grid;place-items:center;
+  background:linear-gradient(170deg,#f4ecd8,#e6d9bc);color:var(--c);font-family:var(--mono);font-size:30px;
+  border-left:7px solid var(--c);transform:rotate(-3deg);box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+.hero h1{font-family:var(--hand);font-weight:400;font-size:clamp(30px,6vw,46px);line-height:1.05}
+.hero p{color:var(--muted);font-size:14px;margin-top:4px}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,24px);margin-bottom:18px}
+.panel h2{font-size:13px;font-family:var(--mono);letter-spacing:.14em;color:var(--muted);font-weight:500;margin-bottom:14px;text-transform:uppercase}
+
+/* Trainer */
+.status{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:var(--c);transition:width .25s}
+.card{
+  width:100%;min-height:200px;border-radius:12px;border:1px solid var(--line);background:var(--card2);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  padding:28px 20px;cursor:pointer;gap:14px;
+}
+.card .q{font-size:clamp(18px,3.4vw,24px);font-weight:600}
+.card .a{font-size:clamp(16px,3vw,20px);color:var(--c);display:none;white-space:pre-line}
+.card.open .a{display:block}
+.card .tip{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+.card.open .tip{display:none}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn{border:1px solid var(--line);background:var(--card2);border-radius:10px;padding:13px;cursor:pointer;font-weight:600;font-size:15px}
+.btn:hover{border-color:var(--c)}
+.btn.ok{border-color:color-mix(in srgb,var(--ok) 55%,transparent)}
+.btn.bad{border-color:color-mix(in srgb,var(--bad) 55%,transparent)}
+.btn:disabled{opacity:.35;cursor:default}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tools .chip{font-size:11px}
+.done{text-align:center;padding:22px 8px}
+.done b{font-size:34px;display:block;color:var(--c)}
+.empty{color:var(--muted);font-size:14px}
+.empty code{font-family:var(--mono);font-size:12px;background:var(--card2);padding:2px 6px;border-radius:4px}
+.keys{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:12px}
+
+/* Kartenliste */
+.list{list-style:none;display:grid;gap:8px}
+.list li{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-radius:10px;background:var(--card2);font-size:14px}
+.list li span:last-child{color:var(--c);white-space:pre-line}
+@media (max-width:520px){.list li{grid-template-columns:1fr;gap:4px}}

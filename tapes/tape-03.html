@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TAPE 03 · ARCHIV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tape.css">
+<script src="../assets/theme.js"></script>
+<script src="../data/tapes.js"></script>
+</head>
+<body data-tape="03">
+
+<header class="top">
+  <a class="back" href="../index.html">← ARCHIV</a>
+  <button class="chip" type="button" data-theme-btn>☾ AUTO</button>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="sticker" id="num">03</div>
+    <div><h1 id="title">TAPE 03</h1><p id="subject"></p></div>
+  </div>
+
+  <section class="panel" id="trainer">
+    <h2>Trainieren</h2>
+    <div id="stage">
+      <div class="status" id="status"><span></span><span></span></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="card" id="card" role="button" tabindex="0">
+        <div class="q" id="q"></div>
+        <div class="a" id="a"></div>
+        <div class="tip">TIPPEN / LEERTASTE ZUM AUFDECKEN</div>
+      </div>
+      <div class="actions">
+        <button class="btn bad" id="bad" type="button">✗ Nochmal</button>
+        <button class="btn ok" id="ok" type="button">✓ Gewusst</button>
+      </div>
+      <div class="tools">
+        <button class="chip" id="shuffle" type="button">Mischen: an</button>
+        <button class="chip" id="restart" type="button">Von vorn</button>
+      </div>
+      <p class="keys">Leertaste aufdecken · → gewusst · ← nochmal · Esc zurück</p>
+    </div>
+    <div class="done" id="done" style="display:none">
+      <b id="score"></b>
+      <p>gewusst</p>
+      <div class="tools" style="justify-content:center">
+        <button class="chip" id="retryWrong" type="button">Nur die falschen üben</button>
+        <button class="chip" id="again" type="button">Alles nochmal</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="listPanel">
+    <h2>Alle Karten</h2>
+    <ol class="list" id="list"></ol>
+  </section>
+</main>
+
+<script>
+/*
+ * ✏️ LERNKARTEN FÜR TAPE 03
+ * Eine Karte pro Zeile: { q: "Frage", a: "Antwort" },
+ * Zeilenumbruch in der Antwort mit \n.
+ */
+window.CARDS = [
+  // { q: "Frage", a: "Antwort" },
+];
+</script>
+<script src="trainer.js"></script>
+</body>
+</html>
