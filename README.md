@@ -8,7 +8,7 @@ Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist rei
 
 ## Ablauf
 
-1. **Startscreen:** Die Kassette wird eingelegt (kurzes Rauschen). Dann kommt der blaue VHS-Bildschirm mit `▶ PLAY`, Zeitzähler, `CH 03` und „WELCOME TO ARCHIV“. Nach 2 Sekunden **verzischt** der Schriftzug zu beiden Seiten.
+1. **Startscreen:** Die Kassette wird eingelegt (kurzes Rauschen). Dann kommt der blaue VHS-Bildschirm mit `▶ PLAY`, Zeitzähler, `CH 03` und „WELCOME TO ARCHIV“. Nach rund einer Sekunde **verzischt** der Schriftzug zu beiden Seiten.
 2. Die **Kassetten klappen auf**. Der Startscreen kommt nur einmal pro Browser-Sitzung, nach „Zurück“ von einer Kassette geht es direkt weiter.
 3. **Kassette öffnen** führt zu ihrer eigenen Seite mit einem **Lernkarten-Trainer**.
 
@@ -35,7 +35,7 @@ Jede Kassette hat ihre eigene Seite mit Lernkarten zum Trainieren. Alles ist rei
 
 ## Weitere Details
 
-- Abgenutzte Etiketten: handgeschriebene Titel, Kaffeeflecken und Klebeband-Reste, bei jeder Kassette etwas anders.
+- Abgenutzte Etiketten: handgeschriebene Titel, vergilbtes Papier und Klebeband-Reste, bei jeder Kassette etwas anders.
 - Die zuletzt angesehene Kassette wird gemerkt (`localStorage`).
 - Ein kurzer Piepton beim Wechseln, erzeugt mit der Web Audio API. Er spielt erst nach dem ersten Klick, weil Browser vorher keinen Ton erlauben.
 - Alles ist schlank gehalten: keine Bibliotheken, kein Build-Schritt.
